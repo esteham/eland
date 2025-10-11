@@ -1,16 +1,3 @@
-Here’s a draft **About** section plus a more fleshed-out **README.md** for the **eland-frontend** repository. Feel free to adjust wording or add more details specific to your project (e.g. features, architecture, dependencies).
-
----
-
-## About
-
-**eland-frontend** is a React + Vite powered frontend application scaffold designed to serve as the user interface layer for the *Eland* project. It provides a fast, modular, and developer-friendly base to build features such as dashboards, forms, data visualizations, and so on. With minimal setup and standard tooling (ESLint, Tailwind CSS, etc.), it helps teams get started quickly on building UI with modern web technologies.
-
----
-
-## README.md
-
-````markdown
 # eland-frontend
 
 Frontend application for the Eland project built using **React** + **Vite**.
