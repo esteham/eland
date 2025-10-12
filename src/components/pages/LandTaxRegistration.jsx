@@ -278,7 +278,7 @@ export default function LandTaxRegistration() {
                 <option value="">Select Survey Type</option>
                 {surveyTypes.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name_bn || s.name_en}
+                    {s.code || s.code}
                   </option>
                 ))}
               </select>
