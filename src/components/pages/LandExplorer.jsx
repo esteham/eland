@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useAuth } from "../../auth/AuthContext";
 
+import { Map, SquareGanttChart } from "lucide-react";
+
 export default function LandExplorer() {
   const nav = useNavigate();
   const { user } = useAuth();
@@ -350,32 +352,29 @@ export default function LandExplorer() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Land Explorer</h1>
-
         {/* Type Selection Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium">Select Type:</label>
-            <div className="flex gap-2">
+            <div className="flex gap-6">
               <button
-                className={`px-4 py-2 rounded ${
+                className={`px-14 py-6 rounded flex items-center gap-2 ${
                   selectedType === "khatiyan"
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-200 text-gray-700"
                 }`}
                 onClick={() => setSelectedType("khatiyan")}
               >
-                Khatian
+                <SquareGanttChart className="h-6 w-6" /> &nbsp; Khatian
               </button>
               <button
-                className={`px-4 py-2 rounded ${
+                className={`px-14 py-6 rounded flex items-center gap-2 ${
                   selectedType === "mouza_map"
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-200 text-gray-700"
                 }`}
                 onClick={() => setSelectedType("mouza_map")}
               >
-                Mouza Map
+                <Map className="h-6 w-6" /> &nbsp; Mouza Map
               </button>
             </div>
           </div>
