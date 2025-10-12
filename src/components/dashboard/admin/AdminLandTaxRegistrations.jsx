@@ -3,22 +3,22 @@ import api from "../../../api";
 
 export default function AdminLandTaxRegistrations() {
   const [registrations, setRegistrations] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let intervalId;
     loadRegistrations();
+    intervalId = setInterval(loadRegistrations, 10000);
+
+    return () => intervalId && clearInterval(intervalId);
   }, []);
 
   const loadRegistrations = async () => {
     try {
-      setLoading(true);
       const { data } = await api.get("/land-tax-registrations");
       setRegistrations(data);
     } catch {
       setError("Failed to load registrations");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -46,7 +46,6 @@ export default function AdminLandTaxRegistrations() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (

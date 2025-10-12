@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 
 const LDTTab = ({ lang, t, user }) => {
   const [ldtRegistrations, setLdtRegistrations] = useState([]);
-  const [loadingLdt, setLoadingLdt] = useState(false);
   const [selectedRegistrations, setSelectedRegistrations] = useState([]);
   const [showPayModal, setShowPayModal] = useState(false);
   const [calculations, setCalculations] = useState([]);
@@ -126,19 +125,18 @@ const LDTTab = ({ lang, t, user }) => {
   };
 
   useEffect(() => {
+    let intervalId;
     const fetchLdt = async () => {
-      setLoadingLdt(true);
       try {
         const { data } = await api.get("/user/land-tax-registrations");
         setLdtRegistrations(data);
       } catch (error) {
         console.error("Error fetching LDT registrations:", error);
         setLdtRegistrations([]);
-      } finally {
-        setLoadingLdt(false);
       }
     };
     fetchLdt();
+    intervalId = setInterval(fetchLdt, 10000);
 
     const fetchKyc = async () => {
       try {
@@ -151,11 +149,8 @@ const LDTTab = ({ lang, t, user }) => {
     fetchKyc();
 
     fetchPayments();
+    return () => intervalId && clearInterval(intervalId);
   }, []);
-
-  if (loadingLdt) {
-    return <p>{t("loading")}</p>;
-  }
 
   if (ldtRegistrations.length === 0) {
     return (
