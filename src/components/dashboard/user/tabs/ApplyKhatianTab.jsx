@@ -20,7 +20,7 @@ const ApplyKhatianTab = ({ lang, t }) => {
     fetchApplications();
   }, []);
 
-  const handleDownloadKhatian = async (documentUrl, appId) => {
+  const handleDownloadDocument = async (documentUrl, appId, appType) => {
     try {
       const response = await api.get(documentUrl, {
         responseType: "blob",
@@ -28,17 +28,18 @@ const ApplyKhatianTab = ({ lang, t }) => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `khatian_application_${appId}.pdf`);
+      const docType = appType === "khatian_request" ? "khatian" : "mouza_map";
+      link.setAttribute("download", `${docType}_application_${appId}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading khatian:", error);
+      console.error("Error downloading document:", error);
       alert(
         lang === LANGS.BN
-          ? "খতিয়ান ডাউনলোড ব্যর্থ। আবার চেষ্টা করুন।"
-          : "Failed to download khatian. Please try again."
+          ? "ডকুমেন্ট ডাউনলোড ব্যর্থ। আবার চেষ্টা করুন।"
+          : "Failed to download document. Please try again."
       );
     }
   };
@@ -107,21 +108,46 @@ const ApplyKhatianTab = ({ lang, t }) => {
 
                   <br />
 
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     <strong>N.B.</strong>: {t("nbNote")}
                   </p>
                 </div>
                 <div>
                   {app.payment_status === "paid" ? (
-                    app.dag && app.dag.document_url ? (
-                      <button
-                        onClick={() =>
-                          handleDownloadKhatian(app.dag.document_url, app.id)
-                        }
-                        className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-                      >
-                        {t("downloadKhatian")}
-                      </button>
+                    app.type === "khatian_request" ? (
+                      app.dag && app.dag.document_url ? (
+                        <button
+                          onClick={() =>
+                            handleDownloadDocument(
+                              app.dag.document_url,
+                              app.id,
+                              app.type
+                            )
+                          }
+                          className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+                        >
+                          {t("downloadKhatian")}
+                        </button>
+                      ) : (
+                        <p>{t("noDocument")}</p>
+                      )
+                    ) : app.type === "mouza_map_request" ? (
+                      app.mouza_map && app.mouza_map.document_url ? (
+                        <button
+                          onClick={() =>
+                            handleDownloadDocument(
+                              app.mouza_map.document_url,
+                              app.id,
+                              app.type
+                            )
+                          }
+                          className="px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700"
+                        >
+                          {t("downloadMouzaMap")}
+                        </button>
+                      ) : (
+                        <p>{t("noDocument")}</p>
+                      )
                     ) : (
                       <p>{t("noDocument")}</p>
                     )

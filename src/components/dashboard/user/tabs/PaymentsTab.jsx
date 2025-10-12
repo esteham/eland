@@ -16,7 +16,7 @@ const PaymentsTab = ({ lang, t }) => {
       setLoadingPayments(true);
       try {
         const { data } = await api.get("/applications");
-        setPaymentsApplications(data);
+        setPaymentsApplications(data.sort((a, b) => b.id - a.id));
       } catch (error) {
         console.error("Error fetching payments:", error);
         setPaymentsApplications([]);
@@ -30,7 +30,13 @@ const PaymentsTab = ({ lang, t }) => {
       setLoadingLdtPayments(true);
       try {
         const { data } = await api.get("/land-tax-payments");
-        setLdtPayments(data);
+        setLdtPayments(
+          data.sort((a, b) => {
+            const dateA = a.paid_at ? new Date(a.paid_at) : new Date(0);
+            const dateB = b.paid_at ? new Date(b.paid_at) : new Date(0);
+            return dateB - dateA;
+          })
+        );
       } catch (error) {
         console.error("Error fetching LDT payments:", error);
         setLdtPayments([]);

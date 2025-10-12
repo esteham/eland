@@ -5,7 +5,7 @@ const TEXTS = {
     // NAV
     personalInfo: "Personal Information",
     address: "Address",
-    applyKhatian: "Apply Khatian",
+    applyKhatian: "Apply Khatian/Maps",
     ldt: "Land Development Tax (LDT)",
     payments: "Payments & Receipts",
     profileKyc: "Profile & KYC",
@@ -40,13 +40,14 @@ const TEXTS = {
     country: "Country",
     selectDistrict: "Select City",
 
-    // Apply Khatian
+    // Apply Khatian/Maps
     applyForKhatian: "Apply for Khatian",
-    startNewApplication: "Search Khatian",
+    startNewApplication: "Search Khatian/Map",
     viewDrafts: "Applies Khatiyan",
     loadingApplications: "Loading applications...",
     noApplications: "No applications found.",
     downloadKhatian: "Download Khatian",
+    downloadMouzaMap: "Download Map",
     payFirst: "Pay first",
     typeLabel: "Type",
     descriptionLabel: "Description",
@@ -124,7 +125,7 @@ const TEXTS = {
     // NAV
     personalInfo: "ব্যক্তিগত তথ্য",
     address: "ঠিকানা",
-    applyKhatian: "খতিয়ান আবেদন",
+    applyKhatian: "খতিয়ান/ম্যাপ আবেদন",
     ldt: "ভূমি উন্নয়ন কর (এলডিটি)",
     payments: "পেমেন্ট ও রসিদ",
     profileKyc: "প্রোফাইল ও কেওয়াইসি",
@@ -161,11 +162,12 @@ const TEXTS = {
 
     // Apply Khatian
     applyForKhatian: "খতিয়ান আবেদন",
-    startNewApplication: "খতিয়ান খুজুন",
+    startNewApplication: "খতিয়ান/ম্যাপ খুজুন",
     viewDrafts: "আবেদন করা খতিয়ান",
     loadingApplications: "আবেদন লোড হচ্ছে...",
     noApplications: "কোনো আবেদন পাওয়া যায়নি।",
     downloadKhatian: "খতিয়ান ডাউনলোড",
+    downloadMouzaMap: "ম্যাপ ডাউনলোড",
     payFirst: "আগে পেমেন্ট করুন",
     typeLabel: "ধরন",
     descriptionLabel: "বিবরণ",
@@ -173,7 +175,7 @@ const TEXTS = {
     noDocument: "কোনো ডকুমেন্ট নেই",
     startNewNote: "নতুন আবেদন করুন অথবা আপনার ড্রাফট দেখুন।",
     nbNote:
-      "[দ্রষ্টব্য: আপনি পেমেন্ট করলে পেমেন্ট স্ট্যাটাস PAID হবে এবং খতিয়ান ডাউনলোড বাটন সক্রিয় হবে।]",
+      "[দ্রষ্টব্য: আপনি পেমেন্ট করলে পেমেন্ট স্ট্যাটাস PAID হবে এবং খতিয়ান/ম্যাপ ডাউনলোড বাটন সক্রিয় হবে।]",
 
     // LDT
     ldtHeader: "ভূমি উন্নয়ন কর (LDT)",

@@ -27,6 +27,7 @@ import AdminSurveyTypes from "./components/dashboard/admin/AdminSurveyTypes";
 import KycApproval from "./components/dashboard/admin/KycApproval";
 import AdminLandTaxRegistrations from "./components/dashboard/admin/AdminLandTaxRegistrations";
 import AdminMutations from "./components/dashboard/admin/AdminMutations";
+import AdminMouzaMaps from "./components/dashboard/admin/AdminMouzaMaps";
 
 import UserDashboard from "./components/dashboard/user/Dashboard";
 
@@ -145,6 +146,7 @@ function App() {
               element={<AdminLandTaxRegistrations />}
             />
             <Route path="mutations" element={<AdminMutations />} />
+            <Route path="mouza-maps" element={<AdminMouzaMaps />} />
           </Route>
 
           {/* User dashboard - NOW WITH header/footer */}
