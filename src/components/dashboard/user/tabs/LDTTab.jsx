@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../../../../api";
 import toast from "react-hot-toast";
 
-const LDTTab = ({ lang, t, user }) => {
+const LDTTab = ({ lang, t }) => {
   const [ldtRegistrations, setLdtRegistrations] = useState([]);
   const [selectedRegistrations, setSelectedRegistrations] = useState([]);
   const [showPayModal, setShowPayModal] = useState(false);
@@ -196,9 +196,9 @@ const LDTTab = ({ lang, t, user }) => {
 
       <div className="space-y-4">
         <div className="flex gap-3 mt-6">
-          <div className="flex gap-62">
+          <div className="flex gap-1">
             <p className="text-gray-600 mb-2">{t("ldtDesc")}</p>
-            <div className="item-end">
+            <div className="text-xs mt-1">
               <a
                 onClick={handlePayLdt}
                 rel="noopener noreferrer"
