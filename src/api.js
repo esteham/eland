@@ -38,13 +38,18 @@ export const createMouzaMap = (formData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 export const updateMouzaMap = (id, formData) => {
+<<<<<<< HEAD
   formData.append("_method", "PUT");
+=======
+  formData.append('_method', 'PUT');
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
   return api.post(`/admin/mouza-maps/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
 export const deleteMouzaMap = (id) => api.delete(`/admin/mouza-maps/${id}`);
 
+<<<<<<< HEAD
 //Admin Side: Polygon /GeoJSON Save
 export const saveDagGeometry = (dagId, data) =>
   api.post(`/admin/dags/${dagId}/geometry`, data, {
@@ -55,4 +60,6 @@ export const saveDagGeometry = (dagId, data) =>
 export const searchDagGeometry = (dagNo, params = {}) =>
   api.get(`/map/dags/search/${dagNo}`, { params });
 
+=======
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
 export default api;

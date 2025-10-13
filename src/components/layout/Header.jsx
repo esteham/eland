@@ -15,28 +15,43 @@ export default function Header() {
       home: "Home",
       landRecords: "Land Records",
       landTax: "Land TAX",
+<<<<<<< HEAD
       landMap: "Search Dag",
+=======
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
       dashboard: "Dashboard",
       adminPanel: "Admin Panel",
       login: "Login",
       register: "Register",
       logout: "Logout",
       welcome: "Welcome",
+<<<<<<< HEAD
       toggle: "বাংলা",
+=======
+      toggle: "বাংলা"
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
     },
     bn: {
       home: "হোম",
       landRecords: "ভূমি রেকর্ড",
       landTax: "ভূমি কর",
+<<<<<<< HEAD
       landMap: "Search Dag",
+=======
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
       dashboard: "ড্যাশবোর্ড",
       adminPanel: "অ্যাডমিন প্যানেল",
       login: "লগইন",
       register: "রেজিস্টার",
       logout: "লগআউট",
       welcome: "স্বাগতম",
+<<<<<<< HEAD
       toggle: "English",
     },
+=======
+      toggle: "English"
+    }
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
   };
 
   const handleLogout = () => {
@@ -90,6 +105,7 @@ export default function Header() {
               {translations[language].landTax}
             </Link>
 
+<<<<<<< HEAD
             <Link
               to="/dag-search-map"
               className={`font-medium transition duration-300 ${
@@ -101,6 +117,8 @@ export default function Header() {
               {translations[language].landMap}
             </Link>
 
+=======
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
             {/* Show Dashboard for all logged-in users */}
             {user && (
               <Link
@@ -140,9 +158,13 @@ export default function Header() {
             </button>
             {user ? (
               <div className="flex items-center space-x-4">
+<<<<<<< HEAD
                 <span className="text-gray-700">
                   {translations[language].welcome}, {user.name}
                 </span>
+=======
+                <span className="text-gray-700">{translations[language].welcome}, {user.name}</span>
+>>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
                 {/* <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
                   {user.role}
                 </span> */}
