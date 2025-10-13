@@ -169,7 +169,7 @@ export default function LandTaxRegistration() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Land Tax Registration</h1>
+        <h1 className="text-3xl mt-9 font-bold mb-6">Land Tax Registration</h1>
 
         {error && (
           <div className="bg-red-50 text-red-700 border border-red-200 p-3 rounded mb-4">

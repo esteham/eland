@@ -142,6 +142,14 @@ export default function KycApproval() {
                     >
                       View Front Image
                     </a>
+                    <img
+                      src={`${api.defaults.baseURL.replace(
+                        "/api",
+                        ""
+                      )}/storage/${kyc.id_front}`}
+                      alt="ID Front"
+                      className="mt-2 max-w-full h-auto max-h-32 border rounded"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -161,6 +169,14 @@ export default function KycApproval() {
                     >
                       View Back Image
                     </a>
+                    <img
+                      src={`${api.defaults.baseURL.replace(
+                        "/api",
+                        ""
+                      )}/storage/${kyc.id_back}`}
+                      alt="ID Back"
+                      className="mt-2 max-w-full h-auto max-h-32 border rounded"
+                    />
                   </div>
                 </div>
               </div>

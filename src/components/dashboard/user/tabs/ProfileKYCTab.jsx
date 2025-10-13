@@ -160,7 +160,7 @@ const ProfileKYCTab = ({ lang, t, user }) => {
                         type="file"
                         accept="image/*"
                         onChange={(e) => setIdFront(e.target.files[0])}
-                        className="mt-1 block w-full"
+                        className="mt-1 border p-1 block w-full"
                         required
                         disabled={kycData?.status === "success"}
                       />
@@ -178,7 +178,7 @@ const ProfileKYCTab = ({ lang, t, user }) => {
                         type="file"
                         accept="image/*"
                         onChange={(e) => setIdBack(e.target.files[0])}
-                        className="mt-1 block w-full"
+                        className="mt-1 border p-1 block w-full"
                         required
                         disabled={kycData?.status === "success"}
                       />
@@ -191,7 +191,7 @@ const ProfileKYCTab = ({ lang, t, user }) => {
                     <button
                       type="submit"
                       disabled={uploadingKyc || kycData?.status === "success"}
-                      className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
+                      className="px-5 py-3 rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
                     >
                       {uploadingKyc ? t("uploading") : t("upload")}
                     </button>
