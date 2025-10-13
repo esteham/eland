@@ -11,19 +11,13 @@
   },
   "dependencies": {
     "axios": "^1.12.2",
-<<<<<<< HEAD
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
-=======
->>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
-<<<<<<< HEAD
     "react-leaflet": "^5.0.0",
-=======
->>>>>>> c25ba98c99f021296fbefe8b2114c579a98d5bba
     "react-router-dom": "^7.9.3"
   },
   "devDependencies": {
