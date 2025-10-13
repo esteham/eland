@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../auth/AuthContext";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { makeT } from "../../../fonts/UserDashbboardFonts";
+import { getUnreadNotificationCount } from "../../../api";
+import ErrorBoundary from "../../ErrorBoundary";
 
 // Import all tab components
 import PersonalInfoTab from "./tabs/PersonalInfoTab";
@@ -18,8 +20,8 @@ import MutationList from "./tabs/MutationList";
 const NAV_KEYS = [
   "personalInfo",
   "address",
-  "applyKhatian",
   "mutations",
+  "applyKhatian",
   "ldt",
   "payments",
   "profileKyc",
@@ -31,6 +33,7 @@ export default function UserDashboard() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useLanguage();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const t = useMemo(() => makeT(language), [language]);
 
@@ -44,6 +47,23 @@ export default function UserDashboard() {
   useEffect(() => {
     setSearchParams({ tab: activeKey });
   }, [activeKey, setSearchParams]);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await getUnreadNotificationCount();
+        setUnreadCount(response.data.count);
+      } catch (error) {
+        console.error("Failed to fetch unread count", error);
+      }
+    };
+
+    fetchUnreadCount();
+    // Poll every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Avatar initials
   const getInitials = (name) => {
@@ -92,7 +112,10 @@ export default function UserDashboard() {
   // ---- Build nav items from keys with current language ----
   const navItems = NAV_KEYS.map((key) => ({
     key,
-    label: t(key),
+    label:
+      key === "messages" && unreadCount > 0
+        ? `${t(key)} (${unreadCount})`
+        : t(key),
   }));
 
   return (
@@ -128,7 +151,7 @@ export default function UserDashboard() {
 
           {/* Main Content */}
           <div className="col-span-12 md:col-span-8 bg-white shadow-lg rounded-lg p-6">
-            {renderContent()}
+            <ErrorBoundary>{renderContent()}</ErrorBoundary>
           </div>
         </div>
       </div>
