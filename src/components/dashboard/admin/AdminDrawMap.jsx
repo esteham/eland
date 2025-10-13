@@ -6,6 +6,7 @@ import api, { saveDagGeometry } from "../../../api";
 export default function AdminDrawMap() {
   const mapRef = useRef(null);
   const drawnLayerRef = useRef(null);
+  const [mapInstance, setMapInstance] = useState(null);
 
   const [dagNo, setDagNo] = useState("");
   const [dagId, setDagId] = useState("");
@@ -14,6 +15,53 @@ export default function AdminDrawMap() {
 
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!ready || !mapInstance) return;
+    const map = mapInstance;
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    drawnLayerRef.current = drawnItems;
+
+    const drawControl = new L.Control.Draw({
+      position: "topleft",
+      draw: {
+        polygon: {
+          allowIntersection: false,
+          showArea: true,
+          metric: true,
+          shapeOptions: { color: "#2563eb", weight: 3, fillOpacity: 0.2 },
+        },
+        marker: false,
+        circle: false,
+        circlemarker: false,
+        rectangle: false,
+        polyline: false,
+      },
+      edit: { featureGroup: drawnItems },
+    });
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, (e) => {
+      drawnItems.clearLayers();
+      drawnItems.addLayer(e.layer);
+    });
+
+    return () => {
+      map.off(L.Draw.Event.CREATED);
+      try {
+        map.removeControl(drawControl);
+      } catch {
+        /* empty */
+      }
+      try {
+        map.removeLayer(drawnItems);
+      } catch {
+        /* empty */
+      }
+    };
+  }, [ready, mapInstance]);
 
   useEffect(() => {
     (async () => {
@@ -143,8 +191,8 @@ export default function AdminDrawMap() {
 
         <button
           onClick={() => {
-            if (!ready || !mapRef.current) return;
-            const drawer = new L.Draw.Polygon(mapRef.current, {
+            if (!ready || !mapInstance) return;
+            const drawer = new L.Draw.Polygon(mapInstance, {
               shapeOptions: { color: "#2563eb", weight: 3, fillOpacity: 0.2 },
               showArea: true,
               allowIntersection: false,
@@ -152,7 +200,7 @@ export default function AdminDrawMap() {
             drawer.enable();
           }}
           className="bg-indigo-600 text-white px-3 py-2 rounded w-full"
-          disabled={!ready}
+          disabled={!ready || !mapInstance}
           title={!ready ? "Loading draw tools..." : "Start drawing"}
         >
           {ready ? "Start Drawing (Polygon)" : "Loading draw tools..."}
@@ -216,6 +264,8 @@ export default function AdminDrawMap() {
           zoom={7}
           whenCreated={(map) => {
             mapRef.current = map;
+            setMapInstance(map);
+            console.log("Map created");
           }}
         >
           <TileLayer
