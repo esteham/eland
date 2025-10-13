@@ -50,13 +50,13 @@ export default function DagSearchMap() {
   };
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full h-screen ">
       {/* Search box */}
-      <div className="absolute z-[9999] top-3 left-5 bg-black/80 text-white rounded-xl shadow p-3">
-        <div className="text-l font-semibold mb-2">User • Search Dag</div>
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="absolute z-1 top-23 left-5 bg-black/30 w-[300px]  rounded-xl shadow p-3">
+        <div className="text-l font-semibold mb-2">Search Dag</div>
+        <div className="flex flex-wrap text-sm items-center gap-2">
           <input
-            className="text-black border bg-white p-1 rounded w-34"
+            className="text-black border bg-white p-1 rounded w-39"
             placeholder=" Dag number"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -68,8 +68,10 @@ export default function DagSearchMap() {
             value={zilId}
             onChange={(e) => setZilId(e.target.value)}
           />
+        </div>
+        <div className="text-sm">
           <input
-            className="text-black border bg-white p-1 rounded w-34"
+            className="text-black border bg-white p-1 rounded w-46 mr-2 mt-1"
             placeholder="Survey Type ID"
             value={surveyTypeId}
             onChange={(e) => setSurveyTypeId(e.target.value)}
@@ -84,10 +86,15 @@ export default function DagSearchMap() {
         </div>
         {err && <div className="text-xs text-red-600 mt-2">{err}</div>}
       </div>
+      <div className="absolute z-1 top-60 left-5 bg-black/60 text-white w-[310px] h-[400px] rounded-xl shadow p-3">
+        <div className="text-l font-semibold mb-2">
+          Your Land Details
+        </div>
+      </div>
 
       {/* Map */}
       <MapContainer
-        className="h-[85vh] w-[1280px] top-10 left-10 rounded"
+        className="z-1 h-[82vh] w-[960px] top-6 left-90 rounded"
         center={[23.8041, 90.4152]}
         zoom={7}
       >
