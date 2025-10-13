@@ -240,6 +240,18 @@ export default function Header() {
                 {translations[language].landTax}
               </Link>
 
+              <Link
+                to="/dag-search-map"
+                className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
+                  location.pathname === "/dag-search-map"
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {translations[language].landMap}
+              </Link>
+
               {/* Show Dashboard for all logged-in users */}
               {user && (
                 <Link
