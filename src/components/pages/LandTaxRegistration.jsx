@@ -1,7 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useAuth } from "../../auth/AuthContext";
+
+// Simple spinner
+function Spinner({ className = "w-4 h-4" }) {
+  return (
+    <svg className={`animate-spin ${className}`} viewBox="0 0 24 24">
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 0 1 8-8v4A4 4 0 0 0 8 12H4z"
+      />
+    </svg>
+  );
+}
+
+// Reusable field wrapper
+function Field({ label, hint, required, children }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-gray-800">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-xs text-gray-500">{hint}</p>}
+    </div>
+  );
+}
 
 export default function LandTaxRegistration() {
   const nav = useNavigate();
@@ -29,21 +64,36 @@ export default function LandTaxRegistration() {
 
   // UI
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false); // for dependent loads
   const [error, setError] = useState("");
+  const mounted = useRef(true);
 
-  // Load Divisions
+  // Helpers
+  const canShowLandDetails = khatiyanNumber.trim() && dagNumber.trim();
+
+  // ===== Initial Loads =====
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         setLoading(true);
-        const { data } = await api.get("/locations/divisions");
-        setDivisions(data);
+        const [{ data: divs }, { data: surveys }] = await Promise.all([
+          api.get("/locations/divisions"),
+          api.get("/locations/survey-types"),
+        ]);
+        if (!mounted.current) return;
+        setDivisions(divs || []);
+        setSurveyTypes(surveys || []);
       } catch {
-        setError("Failed to load divisions");
+        if (!mounted.current) return;
+        setError("Failed to load initial data");
       } finally {
-        setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     })();
+    return () => {
+      mounted.current = false;
+    };
   }, []);
 
   // Division -> Districts
@@ -53,19 +103,29 @@ export default function LandTaxRegistration() {
       setDistrictId("");
       return;
     }
+    const controller = new AbortController();
     (async () => {
       try {
-        setLoading(true);
+        setBusy(true);
         const { data } = await api.get(
-          `/locations/divisions/${divisionId}/districts`
+          `/locations/divisions/${divisionId}/districts`,
+          { signal: controller.signal }
         );
-        setDistricts(data);
-      } catch {
+        if (!mounted.current) return;
+        setDistricts(data || []);
+      } catch (e) {
+        if (
+          !mounted.current ||
+          e.name === "CanceledError" ||
+          e.name === "AbortError"
+        )
+          return;
         setError("Failed to load districts");
       } finally {
-        setLoading(false);
+        if (mounted.current) setBusy(false);
       }
     })();
+    return () => controller.abort();
   }, [divisionId]);
 
   // District -> Upazilas
@@ -75,19 +135,29 @@ export default function LandTaxRegistration() {
       setUpazilaId("");
       return;
     }
+    const controller = new AbortController();
     (async () => {
       try {
-        setLoading(true);
+        setBusy(true);
         const { data } = await api.get(
-          `/locations/districts/${districtId}/upazilas`
+          `/locations/districts/${districtId}/upazilas`,
+          { signal: controller.signal }
         );
-        setUpazilas(data);
-      } catch {
+        if (!mounted.current) return;
+        setUpazilas(data || []);
+      } catch (e) {
+        if (
+          !mounted.current ||
+          e.name === "CanceledError" ||
+          e.name === "AbortError"
+        )
+          return;
         setError("Failed to load upazilas");
       } finally {
-        setLoading(false);
+        if (mounted.current) setBusy(false);
       }
     })();
+    return () => controller.abort();
   }, [districtId]);
 
   // Upazila -> Mouzas
@@ -97,32 +167,65 @@ export default function LandTaxRegistration() {
       setMouzaId("");
       return;
     }
+    const controller = new AbortController();
     (async () => {
       try {
-        setLoading(true);
+        setBusy(true);
         const { data } = await api.get(
-          `/locations/upazilas/${upazilaId}/mouzas`
+          `/locations/upazilas/${upazilaId}/mouzas`,
+          { signal: controller.signal }
         );
-        setMouzas(data);
-      } catch {
+        if (!mounted.current) return;
+        setMouzas(data || []);
+      } catch (e) {
+        if (
+          !mounted.current ||
+          e.name === "CanceledError" ||
+          e.name === "AbortError"
+        )
+          return;
         setError("Failed to load mouzas");
       } finally {
-        setLoading(false);
+        if (mounted.current) setBusy(false);
       }
     })();
+    return () => controller.abort();
   }, [upazilaId]);
 
-  // Load Survey Types
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/locations/survey-types");
-        setSurveyTypes(data);
-      } catch {
-        // optional
-      }
-    })();
-  }, []);
+  // Computed labels for summary
+  const selectedDivision = useMemo(
+    () => divisions.find((d) => String(d.id) === String(divisionId)),
+    [divisions, divisionId]
+  );
+  const selectedDistrict = useMemo(
+    () => districts.find((d) => String(d.id) === String(districtId)),
+    [districts, districtId]
+  );
+  const selectedUpazila = useMemo(
+    () => upazilas.find((u) => String(u.id) === String(upazilaId)),
+    [upazilas, upazilaId]
+  );
+  const selectedMouza = useMemo(
+    () => mouzas.find((m) => String(m.id) === String(mouzaId)),
+    [mouzas, mouzaId]
+  );
+  const selectedSurvey = useMemo(
+    () => surveyTypes.find((s) => String(s.id) === String(surveyTypeId)),
+    [surveyTypes, surveyTypeId]
+  );
+
+  const resetBelow = (level) => {
+    if (level === "division") {
+      setDistrictId("");
+      setUpazilaId("");
+      setMouzaId("");
+    } else if (level === "district") {
+      setUpazilaId("");
+      setMouzaId("");
+    } else if (level === "upazila") {
+      setMouzaId("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -140,16 +243,17 @@ export default function LandTaxRegistration() {
         upazila_id: upazilaId,
         mouza_id: mouzaId,
         survey_type_id: surveyTypeId,
-        khatiyan_number: khatiyanNumber,
-        dag_number: dagNumber,
+        khatiyan_number: khatiyanNumber.trim(),
+        dag_number: dagNumber.trim(),
         land_type: landType,
         land_area: landArea,
       });
-      alert(data.message);
+      alert(data?.message || "Registration submitted");
       nav("/dashboard?tab=ldt", {
         state: { activeTab: "Land Development Tax (LDT)" },
       });
-      // Reset form
+
+      // Reset form (keep division to speed multiple entries if you want—here full reset)
       setDivisionId("");
       setDistrictId("");
       setUpazilaId("");
@@ -167,157 +271,209 @@ export default function LandTaxRegistration() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl mt-9 font-bold mb-6">Land Tax Registration</h1>
-
-        {error && (
-          <div className="bg-red-50 text-red-700 border border-red-200 p-3 rounded mb-4">
-            {error}
+    <div className="min-h-screen  bg-gradient-to-b from-slate-50 to-white">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10  bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-indigo-600 text-white grid place-items-center font-semibold">
+              L
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">
+                Land Tax Registration
+              </h1>
+              <p className="text-xs text-gray-500">
+                Provide location & record details to register LDT
+              </p>
+            </div>
           </div>
-        )}
 
+          <div className="flex items-center gap-2">
+            {loading && (
+              <span className="inline-flex items-center gap-2 text-sm text-gray-600">
+                <Spinner /> Processing…
+              </span>
+            )}
+            {busy && !loading && (
+              <span className="inline-flex items-center gap-2 text-sm text-gray-600">
+                <Spinner /> Loading options…
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main form */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white border rounded p-6 space-y-4"
+          className="lg:col-span-2 bg-white rounded-2xl border shadow-sm p-7 space-y-6 transition"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Division</label>
-              <select
-                className="w-full border rounded p-2"
-                value={divisionId}
-                onChange={(e) => {
-                  setDivisionId(e.target.value);
-                  setDistrictId("");
-                  setUpazilaId("");
-                  setMouzaId("");
-                }}
+          {error && (
+            <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Section: Location */}
+          <section>
+            <h2 className="text-base font-semibold text-gray-900">Location</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Select administrative area to locate your land.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Division" required>
+                <select
+                  className="w-full border p-1 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                  value={divisionId}
+                  onChange={(e) => {
+                    setDivisionId(e.target.value);
+                    resetBelow("division");
+                  }}
+                  required
+                >
+                  <option value="">Select Division</option>
+                  {divisions.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name_bn || d.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="District" required>
+                <select
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                  value={districtId}
+                  onChange={(e) => {
+                    setDistrictId(e.target.value);
+                    resetBelow("district");
+                  }}
+                  disabled={!divisionId || loading || busy}
+                  required
+                >
+                  <option value="">Select District</option>
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name_bn || d.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Upazila" required>
+                <select
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                  value={upazilaId}
+                  onChange={(e) => {
+                    setUpazilaId(e.target.value);
+                    resetBelow("upazila");
+                  }}
+                  disabled={!districtId || loading || busy}
+                  required
+                >
+                  <option value="">Select Upazila</option>
+                  {upazilas.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name_bn || u.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field
+                label="Mouza"
                 required
+                hint="JL number is shown when available."
               >
-                <option value="">Select Division</option>
-                {divisions.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name_bn}
-                  </option>
-                ))}
-              </select>
+                <select
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                  value={mouzaId}
+                  onChange={(e) => setMouzaId(e.target.value)}
+                  disabled={!upazilaId || loading || busy}
+                  required
+                >
+                  <option value="">Select Mouza</option>
+                  {mouzas.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {(m.name_bn || m.name) +
+                        (m.jl_no ? ` (JL: ${m.jl_no})` : "")}
+                    </option>
+                  ))}
+                </select>
+              </Field>
             </div>
+          </section>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">District</label>
-              <select
-                className="w-full border rounded p-2"
-                value={districtId}
-                onChange={(e) => {
-                  setDistrictId(e.target.value);
-                  setUpazilaId("");
-                  setMouzaId("");
-                }}
-                disabled={!divisionId || loading}
+          {/* Section: Record */}
+          <section>
+            <h2 className="text-base font-semibold text-gray-900">Record</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Add survey & record numbers for verification.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Khatiyan Number" required>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={khatiyanNumber}
+                  onChange={(e) => setKhatiyanNumber(e.target.value)}
+                  placeholder="e.g., 12345"
+                  required
+                />
+              </Field>
+              <Field
+                label="Survey Type"
                 required
+                hint="Example: CS, RS, SA, BS, City Survey, etc."
               >
-                <option value="">Select District</option>
-                {districts.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name_bn}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <select
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={surveyTypeId}
+                  onChange={(e) => setSurveyTypeId(e.target.value)}
+                  required
+                >
+                  <option value="">Select Survey Type</option>
+                  {surveyTypes.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.code || s.name || `#${s.id}`}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Upazila</label>
-              <select
-                className="w-full border rounded p-2"
-                value={upazilaId}
-                onChange={(e) => {
-                  setUpazilaId(e.target.value);
-                  setMouzaId("");
-                }}
-                disabled={!districtId || loading}
-                required
-              >
-                <option value="">Select Upazila</option>
-                {upazilas.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name_bn}
-                  </option>
-                ))}
-              </select>
+              <Field label="Dag Number" required>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={dagNumber}
+                  onChange={(e) => setDagNumber(e.target.value)}
+                  placeholder="e.g., 6789"
+                  required
+                />
+              </Field>
             </div>
+          </section>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Mouza</label>
-              <select
-                className="w-full border rounded p-2"
-                value={mouzaId}
-                onChange={(e) => setMouzaId(e.target.value)}
-                disabled={!upazilaId || loading}
-                required
-              >
-                <option value="">Select Mouza</option>
-                {mouzas.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name_bn} {m.jl_no ? `(JL: ${m.jl_no})` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Section: Land details (conditional) */}
+          {canShowLandDetails && (
+            <section className="pt-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-gray-900">
+                  Land Details
+                </h2>
+                <span className="text-xs text-gray-500">
+                  Shown because Khatiyan & Dag are provided
+                </span>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Survey Type
-              </label>
-              <select
-                className="w-full border rounded p-2"
-                value={surveyTypeId}
-                onChange={(e) => setSurveyTypeId(e.target.value)}
-                required
-              >
-                <option value="">Select Survey Type</option>
-                {surveyTypes.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.code || s.code}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Khatiyan Number
-              </label>
-              <input
-                type="text"
-                className="w-full border rounded p-2"
-                value={khatiyanNumber}
-                onChange={(e) => setKhatiyanNumber(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Dag Number
-              </label>
-              <input
-                type="text"
-                className="w-full border rounded p-2"
-                value={dagNumber}
-                onChange={(e) => setDagNumber(e.target.value)}
-                required
-              />
-            </div>
-
-            {khatiyanNumber && dagNumber && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Land Type
-                  </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <Field label="Land Type" required>
                   <select
-                    className="w-full border rounded p-2"
+                    className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     value={landType}
                     onChange={(e) => setLandType(e.target.value)}
                     required
@@ -328,32 +484,110 @@ export default function LandTaxRegistration() {
                     <option value="Residential">Residential</option>
                     <option value="Others">Others</option>
                   </select>
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Land Area (Square Feet)
-                  </label>
+                <Field
+                  label="Land Area (Square Feet)"
+                  required
+                  hint="Provide numeric area. Example: 1200"
+                >
                   <input
                     type="number"
-                    className="w-full border rounded p-2"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     value={landArea}
                     onChange={(e) => setLandArea(e.target.value)}
+                    placeholder="e.g., 1200"
                     required
                   />
-                </div>
-              </>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white rounded p-2 hover:bg-indigo-700 disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Register for Land Tax"}
-          </button>
+                </Field>
+              </div>
+            </section>
+          )}
         </form>
+
+        {/* Live Summary */}
+        <aside className="lg:col-span-1">
+          <div className="bg-white rounded-2xl border shadow-sm p-6 sticky top-20 space-y-4">
+            <h3 className="text-sm font-semibold text-gray-900">Summary</h3>
+            <div className="text-sm text-gray-700 space-y-2">
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Division</span>
+                <span className="font-medium">
+                  {selectedDivision?.name_bn || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">District</span>
+                <span className="font-medium">
+                  {selectedDistrict?.name_bn || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Upazila</span>
+                <span className="font-medium">
+                  {selectedUpazila?.name_bn || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Mouza</span>
+                <span className="font-medium">
+                  {selectedMouza
+                    ? `${selectedMouza.name_bn || selectedMouza.name}${
+                        selectedMouza.jl_no
+                          ? ` (JL: ${selectedMouza.jl_no})`
+                          : ""
+                      }`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Survey</span>
+                <span className="font-medium">
+                  {selectedSurvey?.code || selectedSurvey?.name || "—"}
+                </span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Khatiyan</span>
+                <span className="font-medium">{khatiyanNumber || "—"}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Dag</span>
+                <span className="font-medium">{dagNumber || "—"}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Land Type</span>
+                <span className="font-medium">{landType || "—"}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-500">Area (sft)</span>
+                <span className="font-medium">{landArea || "—"}</span>
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500">
+              Tip: You can keep the summary open while filling the form. It
+              updates live.
+            </div>
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl px-4 py-3 font-medium shadow-sm transition disabled:opacity-60"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Spinner className="w-5 h-5" /> Submitting…
+                  </>
+                ) : (
+                  "Register for Land Tax"
+                )}
+              </button>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );
