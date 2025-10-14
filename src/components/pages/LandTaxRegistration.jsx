@@ -68,6 +68,9 @@ export default function LandTaxRegistration() {
   const [error, setError] = useState("");
   const mounted = useRef(true);
 
+  //Submit Button
+  const formRef = useRef(null);
+
   // Helpers
   const canShowLandDetails = khatiyanNumber.trim() && dagNumber.trim();
 
@@ -307,6 +310,7 @@ export default function LandTaxRegistration() {
       <div className="max-w-6xl mx-auto px-4 py-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main form */}
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="lg:col-span-2 bg-white rounded-2xl border shadow-sm p-7 space-y-6 transition"
         >
@@ -425,11 +429,7 @@ export default function LandTaxRegistration() {
                   required
                 />
               </Field>
-              <Field
-                label="Survey Type"
-                required
-                hint="Example: CS, RS, SA, BS, City Survey, etc."
-              >
+              <Field label="Survey Type" required>
                 <select
                   className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   value={surveyTypeId}
@@ -574,6 +574,7 @@ export default function LandTaxRegistration() {
             <div className="pt-2">
               <button
                 type="submit"
+                onClick={() => formRef.current?.requestSubmit()}
                 className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl px-4 py-3 font-medium shadow-sm transition disabled:opacity-60"
                 disabled={loading}
               >
