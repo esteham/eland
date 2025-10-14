@@ -29,9 +29,12 @@ export const getMutationInvoice = (id) =>
 
 // Notification API methods
 export const getNotifications = () => api.get("/notifications");
-export const markNotificationAsRead = (id) => api.patch(`/notifications/${id}/read`);
-export const markAllNotificationsAsRead = () => api.patch("/notifications/mark-all-read");
-export const getUnreadNotificationCount = () => api.get("/notifications/unread-count");
+export const markNotificationAsRead = (id) =>
+  api.patch(`/notifications/${id}/read`);
+export const markAllNotificationsAsRead = () =>
+  api.patch("/notifications/mark-all-read");
+export const getUnreadNotificationCount = () =>
+  api.get("/notifications/unread-count");
 export const deleteNotification = (id) => api.delete(`/notifications/${id}`);
 
 // Applications
@@ -55,14 +58,26 @@ export const updateMouzaMap = (id, formData) => {
 };
 export const deleteMouzaMap = (id) => api.delete(`/admin/mouza-maps/${id}`);
 
-//Admin Side: Polygon /GeoJSON Save
-export const saveDagGeometry = (dagId, data) =>
-  api.post(`/admin/dags/${dagId}/geometry`, data, {
+// GeoJSON Datas (Admin CRUD)
+export const createGeojsonData = (data) =>
+  api.post(`/admin/geojson-datas`, data, {
     headers: { "Content-Type": "application/json" },
   });
+export const updateGeojsonData = (id, data) =>
+  api.put(`/admin/geojson-datas/${id}`, data, {
+    headers: { "Content-Type": "application/json" },
+  });
+export const deleteGeojsonData = (id) =>
+  api.delete(`/admin/geojson-datas/${id}`);
 
-//User Side: search by dag_no (show map)
+// Public: fetch latest by dag_no
+export const getGeojsonByDagNo = (dagNo, params = {}) =>
+  api.get(`/map/geojson/by-dag/${encodeURIComponent(dagNo)}`, { params });
+
+// Dag Geometry
+export const saveDagGeometry = (id, data) =>
+  api.post(`/admin/geojson-datas`, { dag_id: id, ...data });
 export const searchDagGeometry = (dagNo, params = {}) =>
-  api.get(`/map/dags/search/${dagNo}`, { params });
+  api.get(`/map/geojson/by-dag/${encodeURIComponent(dagNo)}`, { params });
 
 export default api;
