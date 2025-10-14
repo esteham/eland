@@ -1,6 +1,6 @@
 // src/components/dashboard/admin/Dashboard.jsx
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, Link } from "react-router-dom";
+import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/AuthContext";
 import api from "../../../api";
 
@@ -29,8 +29,55 @@ import {
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(() => {
+      api
+        .get(`/search?q=${encodeURIComponent(searchQuery)}`)
+        .then(({ data }) => {
+          setSearchResults(data.results || []);
+          setShowResults(true);
+        })
+        .catch(() => {
+          setSearchResults([]);
+          setShowResults(false);
+        });
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [sidebarOpen]);
+
+  const handleSearchSelect = (result) => {
+    setSearchQuery("");
+    setShowResults(false);
+    navigate(`/admin/${result.to}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 text-gray-900 flex flex-col">
@@ -62,13 +109,40 @@ export default function AdminLayout() {
           }`}
         >
           <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-6 text-black/100" />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200/60 bg-white/50 backdrop-blur-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
               placeholder="Search across registry..."
             />
+            {showResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-200/60 backdrop-blur-sm max-h-64 overflow-y-auto z-50">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSearchSelect(result)}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors duration-200 first:rounded-t-2xl last:rounded-b-2xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Search className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {result.name}
+                        </p>
+                        <p className="text-sm text-gray-500 capitalize">
+                          {result.type.replace("_", " ")}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -102,32 +176,16 @@ export default function AdminLayout() {
       </header>
 
       {/* Body grid */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         {/* Enhanced Sidebar */}
         <aside
-          className={`fixed md:static z-30 top-0 bottom-0 left-0 w-80 bg-gradient-to-b from-white to-blue-50/30 backdrop-blur-xl border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out ${
+          className={`fixed md:static z-30 top-0 bottom-0 left-0 w-80 bg-gradient-to-b from-white to-blue-50/30 backdrop-blur-xl border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-white/20">
-            {/* <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Database className="h-5 w-5 text-blue-600" />
-              </div>
-              <span className="text-sm font-semibold text-gray-600">
-                Navigation Panel
-              </span>
-            </div> */}
-            <button
-              className="md:hidden p-2 rounded-xl hover:bg-white/50 transition-all duration-200"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Close sidebar"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          </div>
-
-          <nav className="p-4 space-y-2 text-sm">
+          <nav className="p-4 space-y-2 text-sm ">
             <SideLink to="" end icon={<LayoutGrid className="h-4 w-4" />}>
               Dashboard Overview
             </SideLink>
@@ -196,7 +254,7 @@ export default function AdminLayout() {
         </aside>
 
         {/* Right-side content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-8 bg-black/4 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
@@ -209,7 +267,7 @@ export default function AdminLayout() {
 /** Enhanced Sidebar Components */
 function SectionTitle({ children, icon }) {
   return (
-    <div className="mt-6 mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center gap-2">
+    <div className="mt-6 mb-3 px-3 text-xs font-bold uppercase tracking-wider text-blue-600 flex items-center gap-2">
       {icon}
       {children}
     </div>
@@ -264,6 +322,7 @@ function SideLink({ to, icon, children, end }) {
 export function AdminHome() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -275,6 +334,7 @@ export function AdminHome() {
       .then(({ data }) => {
         if (!mounted) return;
         setStats(data?.stats || {});
+        setRevenue(data?.revenue || {});
       })
       .catch((e) => {
         if (!mounted) return;
@@ -385,7 +445,7 @@ export function AdminHome() {
             activities, manage data, and track system performance.
           </p>
         </div>
-        {/* <div className="flex gap-3">
+        <div className="flex gap-3">
           <Link
             to="/admin/khatian"
             className="flex items-center gap-2 text-sm px-4 py-3 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 shadow-sm hover:shadow-md transition-all duration-200"
@@ -393,14 +453,7 @@ export function AdminHome() {
             <Search className="h-4 w-4" />
             Quick Search
           </Link>
-          <Link
-            to="/admin/districts"
-            className="flex items-center gap-2 text-sm px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Database className="h-4 w-4" />
-            Manage Data
-          </Link>
-        </div> */}
+        </div>
       </div>
 
       {/* Error State */}
@@ -490,7 +543,7 @@ export function AdminHome() {
         ))}
       </div>
 
-      {/* Recent Activity Placeholder */}
+      {/* Recent Activity */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="h-6 w-6 text-gray-600" />
@@ -498,11 +551,50 @@ export function AdminHome() {
             Recent Activity
           </h3>
         </div>
-        <div className="text-center py-8 text-gray-500">
-          <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p>Activity analytics will appear here</p>
-          <p className="text-sm">Recent updates and system usage metrics</p>
-        </div>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-white mb-3">
+                <TrendingUp className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">
+                Daily Revenue
+              </p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(revenue?.daily ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl text-white mb-3">
+                <BarChart3 className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">
+                Monthly Revenue
+              </p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(revenue?.monthly ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl text-white mb-3">
+                <TrendingUp className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">
+                Yearly Revenue
+              </p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(revenue?.yearly ?? 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
