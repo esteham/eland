@@ -211,9 +211,9 @@ export default function AdminDrawMap() {
   };
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full h-screen ">
       {/* Control panel */}
-      <div className="absolute top-5 left-5 z-[1000] bg-white/95 rounded-2xl shadow p-4 w-[360px] space-y-3">
+      <div className="absolute left-52 z-[9999] bg-black/80 text-white rounded-2xl shadow p-4 w-[330px] space-y-3">
         <div className="text-sm font-semibold">
           Admin • Set Land Boundary (Manual Inputs)
         </div>
@@ -309,7 +309,7 @@ export default function AdminDrawMap() {
         <button
           onClick={handleSave}
           disabled={saving || points.length < 3}
-          className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-3 py-2 rounded w-full"
+          className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white px-3 py-2 rounded w-full"
         >
           {saving ? "Saving..." : "Save Boundary"}
         </button>
@@ -322,7 +322,7 @@ export default function AdminDrawMap() {
 
       {/* Map + live preview */}
       <MapContainer
-        className="h-[85vh] w-full rounded"
+        className="z-1 h-[85vh] w-[780px] left-52 rounded"
         center={[23.8041, 90.4152]}
         zoom={7}
         whenCreated={(m) => {
