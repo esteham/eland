@@ -1,13 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import api from "../../../api";
+import { Plus, Search, X, Loader2, PencilLine, Trash2 } from "lucide-react";
 
 export default function AdminMouzas() {
+  // ---------------- state ----------------
   const [items, setItems] = useState([]);
   const [upazilas, setUpazilas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [form, setForm] = useState({
+  // table UX
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState("id");
+  const [sortDir, setSortDir] = useState("desc");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  // modals
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
+  // form
+  const initialForm = {
     id: null,
     upazila_id: "",
     name_en: "",
@@ -15,14 +31,19 @@ export default function AdminMouzas() {
     jl_no: "",
     mouza_code: "",
     meta: "",
-  });
+  };
+  const [form, setForm] = useState(initialForm);
 
+  // ---------------- data loaders ----------------
   const loadUpazilas = async () => {
     try {
       const { data } = await api.get("/admin/upazilas");
-      setUpazilas(data);
+      setUpazilas(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error("Failed to load upazilas", e);
+      toast.error(
+        e?.response?.data?.message || e.message || "Failed to load upazilas"
+      );
     }
   };
 
@@ -30,11 +51,13 @@ export default function AdminMouzas() {
     try {
       setLoading(true);
       const { data } = await api.get("/admin/mouzas");
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
+      setError("");
     } catch (e) {
-      toast.error(
-        e?.response?.data?.message || e.message || "Failed to load mouzas"
-      );
+      const msg =
+        e?.response?.data?.message || e.message || "Failed to load mouzas";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -45,41 +68,65 @@ export default function AdminMouzas() {
     load();
   }, []);
 
+  // lock body scroll when modal open
+  useEffect(() => {
+    const anyOpen = isFormOpen || isConfirmOpen;
+    document.documentElement.style.overflow = anyOpen ? "hidden" : "";
+    return () => {
+      document.documentElement.style.overflow = "";
+    };
+  }, [isFormOpen, isConfirmOpen]);
+
+  // ---------------- helpers ----------------
+  const safeParseMeta = (value) => {
+    if (!value || !String(value).trim()) return null; // allow empty
+    try {
+      const obj = JSON.parse(value);
+      if (obj && typeof obj === "object" && !Array.isArray(obj)) return obj;
+      toast.error('Meta must be a JSON object (e.g., {"note":"..."})');
+      return undefined; // signal invalid
+    } catch {
+      toast.error("Invalid JSON in Meta");
+      return undefined; // signal invalid
+    }
+  };
+
+  // ---------------- submit ----------------
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const meta = form.meta ? JSON.parse(form.meta) : null;
+      const metaObj = safeParseMeta(form.meta);
+      if (metaObj === undefined) {
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        upazila_id: Number(form.upazila_id) || form.upazila_id,
+        name_en: form.name_en?.trim(),
+        name_bn: form.name_bn?.trim(),
+        jl_no: form.jl_no?.trim() || null,
+        mouza_code: form.mouza_code?.trim() || null,
+        meta: metaObj,
+      };
+
+      if (!payload.upazila_id || !payload.name_en || !payload.name_bn) {
+        toast.error("Upazila, Name (EN) & Name (BN) are required");
+        setLoading(false);
+        return;
+      }
+
       if (form.id) {
-        await api.put(`/admin/mouzas/${form.id}`, {
-          upazila_id: form.upazila_id,
-          name_en: form.name_en,
-          name_bn: form.name_bn,
-          jl_no: form.jl_no || null,
-          mouza_code: form.mouza_code || null,
-          meta,
-        });
+        await api.put(`/admin/mouzas/${form.id}`, payload);
         toast.success("Mouza updated successfully");
       } else {
-        await api.post(`/admin/mouzas`, {
-          upazila_id: form.upazila_id,
-          name_en: form.name_en,
-          name_bn: form.name_bn,
-          jl_no: form.jl_no || null,
-          mouza_code: form.mouza_code || null,
-          meta,
-        });
+        await api.post(`/admin/mouzas`, payload);
         toast.success("Mouza added successfully");
       }
-      setForm({
-        id: null,
-        upazila_id: "",
-        name_en: "",
-        name_bn: "",
-        jl_no: "",
-        mouza_code: "",
-        meta: "",
-      });
+
+      setForm(initialForm);
+      setIsFormOpen(false);
       await load();
     } catch (e) {
       toast.error(e?.response?.data?.message || e.message || "Save failed");
@@ -88,23 +135,33 @@ export default function AdminMouzas() {
     }
   };
 
-  const onEdit = (it) =>
+  // ---------------- edit/delete ----------------
+  const onEdit = (it) => {
     setForm({
       id: it.id,
-      upazila_id: it.upazila_id,
-      name_en: it.name_en,
-      name_bn: it.name_bn,
+      upazila_id: String(it.upazila_id ?? ""),
+      name_en: it.name_en || "",
+      name_bn: it.name_bn || "",
       jl_no: it.jl_no || "",
       mouza_code: it.mouza_code || "",
       meta: it.meta ? JSON.stringify(it.meta) : "",
     });
+    setIsFormOpen(true);
+  };
 
-  const onDelete = async (id) => {
-    if (!confirm("Delete this mouza?")) return;
+  const askDelete = (id) => {
+    setDeleteId(id);
+    setIsConfirmOpen(true);
+  };
+
+  const onDelete = async () => {
+    if (!deleteId) return;
     try {
       setLoading(true);
-      await api.delete(`/admin/mouzas/${id}`);
+      await api.delete(`/admin/mouzas/${deleteId}`);
       toast.success("Mouza deleted successfully");
+      setIsConfirmOpen(false);
+      setDeleteId(null);
       await load();
     } catch (e) {
       toast.error(e?.response?.data?.message || e.message || "Delete failed");
@@ -113,153 +170,421 @@ export default function AdminMouzas() {
     }
   };
 
-  return (
-    <div className="max-w-5xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4">Manage Mouzas</h2>
+  // ---------------- table compute ----------------
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((it) => {
+      const upName = it.upazila?.name_en || it.upazila?.name_bn || "";
+      return [
+        String(it.id),
+        String(it.name_en || ""),
+        String(it.name_bn || ""),
+        String(it.jl_no || ""),
+        String(it.mouza_code || ""),
+        upName,
+      ].some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [items, query]);
 
-      <form
-        onSubmit={onSubmit}
-        className="bg-white border rounded p-4 mb-6 space-y-3"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="text-sm">Upazila</label>
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      const key = sortKey;
+      const va =
+        key === "upazila"
+          ? a.upazila?.name_en || a.upazila?.name_bn || ""
+          : a[key];
+      const vb =
+        key === "upazila"
+          ? b.upazila?.name_en || b.upazila?.name_bn || ""
+          : b[key];
+      if (va == null && vb == null) return 0;
+      if (va == null) return sortDir === "asc" ? -1 : 1;
+      if (vb == null) return sortDir === "asc" ? 1 : -1;
+      if (typeof va === "number" && typeof vb === "number") {
+        return sortDir === "asc" ? va - vb : vb - va;
+      }
+      return sortDir === "asc"
+        ? String(va).localeCompare(String(vb))
+        : String(vb).localeCompare(String(va));
+    });
+    return arr;
+  }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+  const paged = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return sorted.slice(start, start + perPage);
+  }, [sorted, page, perPage]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, perPage]);
+
+  const switchSort = (key) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  // ---------------- UI ----------------
+  return (
+    <div className="mx-auto max-w-6xl p-4 space-y-4">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <h2 className="text-2xl font-semibold">Manage Mouzas</h2>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              className="w-full rounded border pl-8 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Search by name, JL no, code or upazila..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {query && (
+              <button
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={() => setQuery("")}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setForm(initialForm);
+              setIsFormOpen(true);
+            }}
+            className="inline-flex items-center gap-2 rounded bg-indigo-600 text-white px-3 py-2 text-sm hover:bg-indigo-700"
+          >
+            <Plus className="h-4 w-4" /> Add Mouza
+          </button>
+        </div>
+      </header>
+
+      {error && (
+        <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded">
+          {error}
+        </div>
+      )}
+
+      {/* table card */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2 text-sm bg-gray-50 border-b">
+          <div className="text-gray-600">Total: {items.length}</div>
+          <div className="flex items-center gap-2">
+            <label className="text-gray-600">Rows</label>
             <select
-              className="w-full border rounded p-2"
-              value={form.upazila_id}
-              onChange={(e) => setForm({ ...form, upazila_id: e.target.value })}
-              required
+              value={perPage}
+              onChange={(e) => setPerPage(Number(e.target.value))}
+              className="border rounded px-2 py-1"
             >
-              <option value="">Select Upazila</option>
-              {upazilas.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name_en}
+              {[10, 20, 50].map((n) => (
+                <option key={n} value={n}>
+                  {n}
                 </option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="text-sm">Name (EN)</label>
-            <input
-              className="w-full border rounded p-2"
-              value={form.name_en}
-              onChange={(e) => setForm({ ...form, name_en: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm">Name (BN)</label>
-            <input
-              className="w-full border rounded p-2"
-              value={form.name_bn}
-              onChange={(e) => setForm({ ...form, name_bn: e.target.value })}
-              required
-            />
-          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="text-sm">JL No</label>
-            <input
-              className="w-full border rounded p-2"
-              value={form.jl_no}
-              onChange={(e) => setForm({ ...form, jl_no: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="text-sm">Mouza Code</label>
-            <input
-              className="w-full border rounded p-2"
-              value={form.mouza_code}
-              onChange={(e) => setForm({ ...form, mouza_code: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="text-sm">Meta (JSON)</label>
-            <textarea
-              className="w-full border rounded p-2"
-              value={form.meta}
-              onChange={(e) => setForm({ ...form, meta: e.target.value })}
-              placeholder="{}"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            disabled={loading}
-            className="bg-indigo-600 text-white px-4 py-2 rounded"
-          >
-            {form.id ? "Update" : "Create"}
-          </button>
-          {form.id && (
-            <button
-              type="button"
-              className="border px-3 py-2 rounded"
-              onClick={() =>
-                setForm({
-                  id: null,
-                  upazila_id: "",
-                  name_en: "",
-                  name_bn: "",
-                  jl_no: "",
-                  mouza_code: "",
-                  meta: "",
-                })
-              }
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
 
-      <div className="bg-white border rounded">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-gray-50">
-              <th className="text-left p-2">ID</th>
-              <th className="text-left p-2">Upazila</th>
-              <th className="text-left p-2">Name (EN)</th>
-              <th className="text-left p-2">Name (BN)</th>
-              <th className="text-left p-2">JL No</th>
-              <th className="text-left p-2">Mouza Code</th>
-              <th className="p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((it) => (
-              <tr key={it.id} className="border-b">
-                <td className="p-2">{it.id}</td>
-                <td className="p-2">{it.upazila?.name_en || "-"}</td>
-                <td className="p-2">{it.name_en}</td>
-                <td className="p-2">{it.name_bn}</td>
-                <td className="p-2">{it.jl_no || "-"}</td>
-                <td className="p-2">{it.mouza_code || "-"}</td>
-                <td className="p-2 text-right">
-                  <button
-                    className="text-indigo-600 mr-3"
-                    onClick={() => onEdit(it)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="text-red-600"
-                    onClick={() => onDelete(it.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b text-left">
+                {[
+                  { k: "id", label: "ID", w: "w-[80px]" },
+                  { k: "upazila", label: "Upazila" },
+                  { k: "name_en", label: "Name (EN)" },
+                  { k: "name_bn", label: "Name (BN)" },
+                  { k: "jl_no", label: "JL No" },
+                  { k: "mouza_code", label: "Mouza Code" },
+                  {
+                    k: "actions",
+                    label: "Actions",
+                    sortable: false,
+                    w: "w-[140px]",
+                  },
+                ].map((col) => (
+                  <th key={col.k} className={`p-2 font-medium ${col.w || ""}`}>
+                    {col.sortable === false ? (
+                      <span>{col.label}</span>
+                    ) : (
+                      <button
+                        className="inline-flex items-center gap-1 hover:text-indigo-600"
+                        onClick={() => switchSort(col.k)}
+                      >
+                        <span>{col.label}</span>
+                        {sortKey === col.k && (
+                          <span className="text-xs text-gray-400">
+                            {sortDir === "asc" ? "▲" : "▼"}
+                          </span>
+                        )}
+                      </button>
+                    )}
+                  </th>
+                ))}
               </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td className="p-3 text-center text-gray-500" colSpan={7}>
-                  {loading ? "Loading..." : "No mouzas found."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(6)].map((_, i) => (
+                  <tr key={i} className="border-b">
+                    {[...Array(7)].map((__, j) => (
+                      <td key={j} className="p-2">
+                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : paged.length ? (
+                paged.map((it) => (
+                  <tr key={it.id} className="border-b hover:bg-gray-50/60">
+                    <td className="p-2">{it.id}</td>
+                    <td className="p-2">
+                      {it.upazila?.name_en || it.upazila?.name_bn || "-"}
+                    </td>
+                    <td className="p-2 font-medium">{it.name_en}</td>
+                    <td className="p-2">{it.name_bn}</td>
+                    <td className="p-2">{it.jl_no || "—"}</td>
+                    <td className="p-2">{it.mouza_code || "—"}</td>
+                    <td className="p-2">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          className="text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
+                          onClick={() => onEdit(it)}
+                        >
+                          <PencilLine className="h-4 w-4" /> Edit
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                          onClick={() => askDelete(it.id)}
+                        >
+                          <Trash2 className="h-4 w-4" /> Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="p-4 text-center text-gray-500" colSpan={7}>
+                    No mouzas found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* pagination */}
+        <div className="flex items-center justify-between px-3 py-2 border-t bg-white text-sm">
+          <div className="text-gray-500">
+            Page {page} of {totalPages}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              First
+            </button>
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Prev
+            </button>
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </button>
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              Last
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ---- Form Modal ---- */}
+      {isFormOpen && (
+        <Modal
+          title={form.id ? "Edit Mouza" : "Create Mouza"}
+          onClose={() => setIsFormOpen(false)}
+        >
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">
+                  Upazila <span className="text-red-500">*</span>
+                </label>
+                <select
+                  className="w-full border rounded p-2 mt-1"
+                  value={form.upazila_id}
+                  onChange={(e) =>
+                    setForm({ ...form, upazila_id: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select Upazila</option>
+                  {upazilas.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name_en}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">JL No</label>
+                <input
+                  className="w-full border rounded p-2 mt-1"
+                  value={form.jl_no}
+                  onChange={(e) => setForm({ ...form, jl_no: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">
+                  Name (EN) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  className="w-full border rounded p-2 mt-1"
+                  value={form.name_en}
+                  onChange={(e) =>
+                    setForm({ ...form, name_en: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">
+                  Name (BN) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  className="w-full border rounded p-2 mt-1"
+                  value={form.name_bn}
+                  onChange={(e) =>
+                    setForm({ ...form, name_bn: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Mouza Code</label>
+                <input
+                  className="w-full border rounded p-2 mt-1"
+                  value={form.mouza_code}
+                  onChange={(e) =>
+                    setForm({ ...form, mouza_code: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Meta (JSON)</label>
+              <textarea
+                className="w-full border rounded p-2 mt-1"
+                value={form.meta}
+                onChange={(e) => setForm({ ...form, meta: e.target.value })}
+                placeholder='{"note":"optional"}'
+                rows={4}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty or provide a valid JSON object.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              {form.id && (
+                <button
+                  type="button"
+                  className="px-3 py-2 border rounded"
+                  onClick={() => setForm(initialForm)}
+                >
+                  Reset
+                </button>
+              )}
+              <button
+                type="button"
+                className="px-3 py-2 border rounded"
+                onClick={() => setIsFormOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={loading}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {form.id ? "Update" : "Create"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ---- Confirm Delete Modal ---- */}
+      {isConfirmOpen && (
+        <Modal title="Delete Mouza?" onClose={() => setIsConfirmOpen(false)}>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-3 py-2 border rounded"
+                onClick={() => setIsConfirmOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-3 py-2 bg-red-600 text-white rounded"
+                onClick={onDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function Modal({ title, children, onClose }) {
+  useEffect(() => {
+    const h = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4 max-h-[85vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-800"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );
