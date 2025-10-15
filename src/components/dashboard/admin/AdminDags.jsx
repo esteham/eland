@@ -11,6 +11,7 @@ export default function AdminDags() {
   const [form, setForm] = useState({
     id: null,
     zil_id: "",
+    khatiyan_number: "",
     dag_no: "",
     survey_type: "",
     khotiyan: "", // will hold JSON string (array of {owner, area})
@@ -124,6 +125,7 @@ export default function AdminDags() {
 
       const fd = new FormData();
       fd.append("zil_id", form.zil_id);
+      fd.append("khatiyan_number", form.khatiyan_number);
       fd.append("dag_no", form.dag_no);
       if (form.survey_type) fd.append("survey_type_id", form.survey_type);
       fd.append("khotiyan", JSON.stringify(khArr));
@@ -142,6 +144,7 @@ export default function AdminDags() {
       setForm({
         id: null,
         zil_id: "",
+        khatiyan_number: "",
         dag_no: "",
         survey_type: "",
         khotiyan: "",
@@ -163,6 +166,7 @@ export default function AdminDags() {
     setForm({
       id: it.id,
       zil_id: it.zil_id ?? "",
+      khatiyan_number: it.khatiyan_number ?? "",
       dag_no: it.dag_no ?? "",
       survey_type: it.survey_type_id ?? "",
       khotiyan: it.khotiyan ? JSON.stringify(it.khotiyan) : "",
@@ -195,7 +199,7 @@ export default function AdminDags() {
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className=" md:col-span-1 gap-4">
-            <div className="mb-2">
+            <div className="mb-4">
               <label className="text-sm font-semibold">Zil</label>
               <select
                 className="w-full border rounded p-2"
@@ -212,6 +216,37 @@ export default function AdminDags() {
               </select>
             </div>
 
+            <div className="mb-2">
+              <label className="text-sm font-semibold">Khatiyan Number</label>
+              <input
+                className="w-full border rounded p-2"
+                value={form.khatiyan_number}
+                onChange={(e) =>
+                  setForm({ ...form, khatiyan_number: e.target.value })
+                }
+                required
+              />
+            </div>
+          </div>
+
+          <div md:col-span-1 gap-4>
+            <div className="mb-4">
+              <label className="text-sm font-semibold">Survey Type</label>
+              <select
+                className="w-full border rounded p-2"
+                value={form.survey_type}
+                onChange={(e) =>
+                  setForm({ ...form, survey_type: e.target.value })
+                }
+              >
+                <option value="">Select Survey Type</option>
+                {surveyTypes.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.name_en}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="text-sm font-semibold">Dag No</label>
               <input
@@ -221,24 +256,6 @@ export default function AdminDags() {
                 required
               />
             </div>
-          </div>
-
-          <div className="mb-2">
-            <label className="text-sm font-semibold">Survey Type</label>
-            <select
-              className="w-full border rounded p-2"
-              value={form.survey_type}
-              onChange={(e) =>
-                setForm({ ...form, survey_type: e.target.value })
-              }
-            >
-              <option value="">Select Survey Type</option>
-              {surveyTypes.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name_en}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Quick Khotiyan Builder (Owner + Area -> builds array) */}
@@ -365,6 +382,7 @@ export default function AdminDags() {
                 setForm({
                   id: null,
                   zil_id: "",
+                  khatiyan_number: "",
                   dag_no: "",
                   survey_type: "",
                   khotiyan: "",
@@ -385,6 +403,7 @@ export default function AdminDags() {
             <tr className="border-b bg-gray-50">
               <th className="text-left p-2">ID</th>
               <th className="text-left p-2">Zil No</th>
+              <th className="text-left p-2">Khatiyan No</th>
               <th className="text-left p-2">Dag No</th>
               <th className="text-left p-2">Survey Type</th>
               <th className="text-left p-2">Document</th>
@@ -396,10 +415,11 @@ export default function AdminDags() {
               <tr key={it.id} className="border-b">
                 <td className="p-2">{it.id}</td>
                 <td className="p-2">{it.zil?.zil_no || "-"}</td>
+                <td className="p-2">{it.khatiyan_number}</td>
                 <td className="p-2">{it.dag_no}</td>
                 <td className="p-2">
                   {surveyTypes.find((st) => st.id === it.survey_type_id)
-                    ?.name_en || "-"}
+                    ?.code || "-"}
                 </td>
                 <td className="p-2">
                   {it.document_url ? (
