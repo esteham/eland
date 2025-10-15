@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useAuth } from "../../auth/AuthContext";
 
+import LogoPng from "../../../public/images/logo.png";
+
 // Simple spinner
 function Spinner({ className = "w-4 h-4" }) {
   return (
@@ -276,6 +278,20 @@ export default function LandTaxRegistration() {
   return (
     <div className="min-h-screen  bg-gradient-to-b from-slate-50 to-white">
       {/* Sticky header */}
+      <div
+        className="fixed top-1 z-[9999] right-0 h-[40vh] w-2/12 hidden md:block z-[1]"
+        style={{
+          backgroundImage: `url(${LogoPng})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+          backgroundColor: "transparent",
+          transition: "background-image 900ms ease-in-out",
+          filter: "brightness(.98)",
+          // pointerEvents: "none",
+        }}
+        aria-hidden="true"
+      />
       <div className="sticky top-0 z-10  bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 
+import LogoHeader from "../../../public/images/LogoHeader.png";
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
@@ -50,10 +52,22 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
+            {/* <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">E</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">E-Land</span>
+            <span className="text-2xl font-bold text-gray-900">E-Land</span> */}
+            <div
+              className="fixed w-43 h-43 flex items-center justify-center"
+              style={{
+                backgroundImage: `url(${LogoHeader})`,
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                filter: "brightness(1)",
+                pointerEvents: "none",
+              }}
+              aria-hidden="true"
+            />
           </Link>
 
           {/* Desktop Navigation */}
