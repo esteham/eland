@@ -1,5 +1,4 @@
-// src/components/dashboard/admin/Dashboard.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/AuthContext";
 import api from "../../../api";
@@ -30,6 +29,9 @@ import {
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const asideRef = useRef(null);
+  const mainRef = useRef(null);
+  const touchStartYRef = useRef(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,6 +80,39 @@ export default function AdminLayout() {
     setShowResults(false);
     navigate(`/admin/${result.to}`);
   };
+
+  function stopWheelChain(e, el) {
+    const atTop = el.scrollTop <= 0;
+    const atBottom =
+      Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
+    if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+      e.preventDefault(); // parent scroll আটকায়
+    }
+  }
+
+  function onTouchStart(e) {
+    touchStartYRef.current = e.touches[0].clientY;
+  }
+  function onTouchMove(e) {
+    const el = e.currentTarget;
+    const currY = e.touches[0].clientY;
+    const deltaY = touchStartYRef.current - currY;
+    const atTop = el.scrollTop <= 0;
+    const atBottom =
+      Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
+    if ((atTop && deltaY < 0) || (atBottom && deltaY > 0)) {
+      e.preventDefault();
+    }
+  }
+
+  // Ensure passive:false for wheel so preventDefault works everywhere
+  useEffect(() => {
+    const el = asideRef.current;
+    if (!el) return;
+    const handler = (ev) => stopWheelChain(ev, el);
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 text-gray-900 flex flex-col">
@@ -176,14 +211,28 @@ export default function AdminLayout() {
       </header>
 
       {/* Body grid */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-4rem)]">
         {/* Enhanced Sidebar */}
         <aside
-          className={`fixed md:static z-30 top-0 bottom-0 left-0 w-80 bg-gradient-to-b from-white to-blue-50/30 backdrop-blur-xl border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          }`}
-          onWheel={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
+          ref={asideRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onMouseEnter={() => {
+            if (mainRef.current) mainRef.current.style.overflowY = "hidden";
+          }}
+          onMouseLeave={() => {
+            if (mainRef.current) mainRef.current.style.overflowY = "auto";
+          }}
+          className={`fixed md:sticky z-30 left-0 w-80 flex-none 
+            top-16 bottom-0 md:bottom-auto 
+            h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)]
+            bg-gradient-to-b from-white to-blue-50/30 backdrop-blur-xl
+            border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out
+            overflow-y-auto overscroll-none touch-pan-y ${
+              sidebarOpen
+                ? "translate-x-0"
+                : "-translate-x-full md:translate-x-0"
+            }`}
         >
           <nav className="p-4 space-y-2 text-sm ">
             <SideLink to="" end icon={<LayoutGrid className="h-4 w-4" />}>
@@ -254,7 +303,11 @@ export default function AdminLayout() {
         </aside>
 
         {/* Right-side content */}
-        <main className="flex-1 p-8 bg-black/4 overflow-y-auto">
+        <main
+          ref={mainRef}
+          className="flex-1 min-w-0 p-8 bg-black/4 overflow-y-auto overscroll-contain h-[calc(100vh-4rem)]"
+          style={{ scrollbarGutter: "stable" }}
+        >
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
