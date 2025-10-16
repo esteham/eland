@@ -279,7 +279,7 @@ export default function LandTaxRegistration() {
     <div className="min-h-screen  bg-gradient-to-b from-slate-50 to-white">
       {/* Sticky header */}
       <div
-        className="fixed top-1 z-[9999] right-0 h-[40vh] w-2/12 hidden md:block z-[1]"
+        className="fixed top-24 z-[9999] right-0 h-[18vh] w-2/14 hidden md:block z-[1]"
         style={{
           backgroundImage: `url(${LogoPng})`,
           backgroundRepeat: "no-repeat",
@@ -293,11 +293,8 @@ export default function LandTaxRegistration() {
         aria-hidden="true"
       />
       <div className="sticky top-0 z-10  bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 mt-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-indigo-600 text-white grid place-items-center font-semibold">
-              L
-            </div>
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
                 Land Tax Registration

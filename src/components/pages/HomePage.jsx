@@ -13,7 +13,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br py-12 from-blue-50 to-indigo-100 flex items-center justify-center relative">
       <div
-        className="fixed top-1 right-0 h-[60vh] w-2/7 hidden md:block z-[1]"
+        className="fixed top-20 right-0 h-[40vh] w-2/7 hidden md:block z-[1]"
         style={{
           backgroundImage: `url(${LogoPng})`,
           backgroundRepeat: "no-repeat",

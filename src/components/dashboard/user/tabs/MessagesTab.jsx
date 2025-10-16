@@ -11,6 +11,8 @@ const MessagesTab = ({ t }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
   useEffect(() => {
     fetchNotifications();
@@ -119,6 +121,8 @@ const MessagesTab = ({ t }) => {
               notification.type && notification.type.includes("approved");
             const isRejected =
               notification.type && notification.type.includes("rejected");
+            const isFlagged =
+              notification.type && notification.type.includes("flagged");
             return (
               <div
                 key={notification.id}
@@ -134,9 +138,15 @@ const MessagesTab = ({ t }) => {
                       {notification.title}
                     </h3>
                     <p
-                      className={`text-gray-700 mt-1 ${
+                      className={`text-gray-700 mt-1 cursor-pointer ${
                         isApproved ? "text-green-700" : ""
-                      } ${isRejected ? "text-red-700" : ""}`}
+                      } ${isRejected ? "text-red-700" : ""} ${
+                        isFlagged ? "text-orange-700" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedMessage(notification);
+                        setModalOpen(true);
+                      }}
                     >
                       {notification.message}
                     </p>
@@ -164,6 +174,24 @@ const MessagesTab = ({ t }) => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {modalOpen && selectedMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">{selectedMessage.title}</h3>
+            <p className="text-gray-700 mb-4">{selectedMessage.message}</p>
+            <p className="text-sm text-gray-500 mb-4">
+              {formatDate(selectedMessage.created_at)}
+            </p>
+            <button
+              onClick={() => setModalOpen(false)}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import api from "../../../api";
-import { Plus, Search, X, Loader2, PencilLine, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  X,
+  Loader2,
+  PencilLine,
+  Trash2,
+  Download,
+} from "lucide-react";
 
 export default function AdminUpazilas() {
   // ---------------- state ----------------
@@ -12,6 +20,7 @@ export default function AdminUpazilas() {
 
   // table UX
   const [query, setQuery] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
   const [sortKey, setSortKey] = useState("id");
   const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(1);
@@ -146,9 +155,13 @@ export default function AdminUpazilas() {
 
   // ---------------- table compute ----------------
   const filtered = useMemo(() => {
+    let arr = items;
+    if (selectedDistrict) {
+      arr = arr.filter((it) => String(it.district_id) === selectedDistrict);
+    }
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((it) => {
+    if (!q) return arr;
+    return arr.filter((it) => {
       const dName = it.district?.name_en || it.district?.name_bn || "";
       return [
         String(it.id),
@@ -158,7 +171,32 @@ export default function AdminUpazilas() {
         dName,
       ].some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [items, query]);
+  }, [items, query, selectedDistrict]);
+
+  // ---------------- download CSV ----------------
+  const downloadCSV = () => {
+    const headers = ["ID", "District", "Name (EN)", "Name (BN)", "BBS Code"];
+    const rows = filtered.map((item) => [
+      item.id,
+      item.district?.name_en || item.district?.name_bn || "",
+      item.name_en,
+      item.name_bn,
+      item.bbs_code || "",
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
+
+    // 👉 Add UTF-8 BOM to fix Bangla characters in Excel
+    const csvWithBom = "\uFEFF" + csvContent;
+
+    const blob = new Blob([csvWithBom], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "upazilas.csv";
+    link.click();
+  };
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -193,7 +231,7 @@ export default function AdminUpazilas() {
 
   useEffect(() => {
     setPage(1);
-  }, [query, perPage]);
+  }, [query, perPage, selectedDistrict]);
 
   const switchSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -226,6 +264,24 @@ export default function AdminUpazilas() {
               </button>
             )}
           </div>
+          <select
+            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={selectedDistrict}
+            onChange={(e) => setSelectedDistrict(e.target.value)}
+          >
+            <option value="">All Districts</option>
+            {districts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name_en}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={downloadCSV}
+            className="inline-flex items-center gap-2 rounded bg-green-600 text-white px-3 py-2 text-sm hover:bg-green-700"
+          >
+            <Download className="h-4 w-4" /> Download CSV
+          </button>
           <button
             onClick={() => {
               setForm(initialForm);
