@@ -12,6 +12,7 @@ import {
   UploadCloud,
   Loader2,
   Eye,
+  Download,
 } from "lucide-react";
 
 export default function AdminDags() {
@@ -20,6 +21,7 @@ export default function AdminDags() {
   const [zils, setZils] = useState([]);
   const [surveyTypes, setSurveyTypes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedZil, setSelectedZil] = useState("");
 
   // table UX
   const [query, setQuery] = useState("");
@@ -218,9 +220,13 @@ export default function AdminDags() {
 
   // ---------------- table compute ----------------
   const filtered = useMemo(() => {
+    let arr = items;
+    if (selectedZil) {
+      arr = arr.filter((it) => String(it.zil_id) === selectedZil);
+    }
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((it) => {
+    if (!q) return arr;
+    return arr.filter((it) => {
       const zil = it.zil?.zil_no || "";
       const st = String(it.survey_type_id || "");
       const stCode =
@@ -236,7 +242,44 @@ export default function AdminDags() {
         stCode,
       ].some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [items, query, surveyTypes]);
+  }, [items, query, surveyTypes, selectedZil]);
+
+  //----- Download CSV ---------
+  const downloadCSV = () => {
+    const reportTitle = "Zils Khatiyan Dags";
+    const reportDate = new Date().toLocaleDateString();
+
+    // CSV Header
+    const headers = ["ID", "Zil No", "Khatiyan No", "Dag No", "Survey Type"];
+    const rows = filtered.map((item) => [
+      item.id,
+      item.zil?.zil_no || "",
+      item.khatiyan_number,
+      item.dag_no,
+      surveyTypes.find((st) => st.id === item.survey_type_id)?.code ||
+        surveyTypes.find((st) => st.id === item.survey_type_id)?.name_en ||
+        "",
+    ]);
+
+    const csvContent = [
+      [`"${reportTitle}"`],
+      [`"Date: ${reportDate}"`],
+      [""],
+      headers,
+      ...rows,
+    ]
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
+
+    // 👉 Add UTF-8 BOM to fix Bangla characters in Excel
+    const csvWithBom = "\uFEFF" + csvContent;
+
+    const blob = new Blob([csvWithBom], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "dags.csv";
+    link.click();
+  };
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -265,7 +308,7 @@ export default function AdminDags() {
   useEffect(() => {
     // reset to first page when filters change
     setPage(1);
-  }, [query, perPage]);
+  }, [query, perPage, selectedZil]);
 
   const switchSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -298,6 +341,24 @@ export default function AdminDags() {
               </button>
             )}
           </div>
+          <select
+            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={selectedZil}
+            onChange={(e) => setSelectedZil(e.target.value)}
+          >
+            <option value="">All Dag</option>
+            {zils.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.zil_no}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={downloadCSV}
+            className="inline-flex items-center gap-2 rounded bg-green-600 text-white px-3 py-2 text-sm hover:bg-green-700"
+          >
+            <Download className="h-4 w-4" /> Download CSV
+          </button>
           <button
             onClick={() => {
               setForm(initialForm);

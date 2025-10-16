@@ -175,7 +175,18 @@ export default function AdminUpazilas() {
 
   // ---------------- download CSV ----------------
   const downloadCSV = () => {
-    const headers = ["ID", "District", "Name (EN)", "Name (BN)", "BBS Code"];
+    const selectedDistrictObj = districts.find(d => d.id == selectedDistrict);
+    const district_name = selectedDistrictObj ? selectedDistrictObj.name_en : "All";
+    const reportTitle = `"${district_name} Upzilas"`;
+    const reportDate = new Date().toLocaleDateString();
+
+    const headers = [
+      "ID",
+      "District",
+      "Upazila Name (EN)",
+      "Upazila Name (BN)",
+      "BBS Code",
+    ];
     const rows = filtered.map((item) => [
       item.id,
       item.district?.name_en || item.district?.name_bn || "",
@@ -184,7 +195,13 @@ export default function AdminUpazilas() {
       item.bbs_code || "",
     ]);
 
-    const csvContent = [headers, ...rows]
+    const csvContent = [
+      [`"${reportTitle}"`],
+      [`"Date: ${reportDate}"`],
+      [""],
+      headers,
+      ...rows,
+    ]
       .map((row) => row.map((field) => `"${field}"`).join(","))
       .join("\n");
 
