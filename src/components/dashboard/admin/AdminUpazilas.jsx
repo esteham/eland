@@ -175,8 +175,10 @@ export default function AdminUpazilas() {
 
   // ---------------- download CSV ----------------
   const downloadCSV = () => {
-    const selectedDistrictObj = districts.find(d => d.id == selectedDistrict);
-    const district_name = selectedDistrictObj ? selectedDistrictObj.name_en : "All";
+    const selectedDistrictObj = districts.find((d) => d.id == selectedDistrict);
+    const district_name = selectedDistrictObj
+      ? selectedDistrictObj.name_en
+      : "All";
     const reportTitle = `"${district_name} Upzilas"`;
     const reportDate = new Date().toLocaleDateString();
 
