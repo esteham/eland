@@ -32,6 +32,7 @@ import AdminMutations from "./components/dashboard/admin/AdminMutations";
 import AdminMouzaMaps from "./components/dashboard/admin/AdminMouzaMaps";
 
 import AdminDrawMap from "./components/dashboard/admin/AdminDrawMap";
+import AdminRevenue from "./components/dashboard/admin/AdminRevenue";
 
 import UserDashboard from "./components/dashboard/user/Dashboard";
 
@@ -160,6 +161,7 @@ function App() {
               <Route path="mutations" element={<AdminMutations />} />
               <Route path="mouza-maps" element={<AdminMouzaMaps />} />
               <Route path="draw-maps" element={<AdminDrawMap />} />
+              <Route path="revenue" element={<AdminRevenue />} />
             </Route>
 
             {/* User dashboard - NOW WITH header/footer */}

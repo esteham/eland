@@ -234,9 +234,12 @@ export default function AdminLayout() {
                 : "-translate-x-full md:translate-x-0"
             }`}
         >
-          <nav className="p-4 space-y-2 text-sm ">
+          <nav className="mt-3 p-5 space-y-1 text-sm ">
             <SideLink to="" end icon={<LayoutGrid className="h-4 w-4" />}>
               Dashboard Overview
+            </SideLink>
+            <SideLink to="revenue" icon={<TrendingUp className="h-4 w-4" />}>
+              Revenue Details
             </SideLink>
             <SectionTitle icon={<Users className="h-4 w-4" />}>
               User Request{" "}
@@ -293,6 +296,7 @@ export default function AdminLayout() {
             <SideLink to="dags" icon={<Map className="h-4 w-4" />}>
               Dags
             </SideLink>
+
             <SectionTitle icon={<FileText className="h-4 w-4" />}>
               Documents
             </SectionTitle>
@@ -597,7 +601,10 @@ export function AdminHome() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+      <Link
+        to="/admin/revenue"
+        className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer block"
+      >
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="h-6 w-6 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-800">
@@ -648,7 +655,7 @@ export function AdminHome() {
             </div>
           </div>
         )}
-      </div>
+      </Link>
     </div>
   );
 }
