@@ -4,6 +4,7 @@ import { useAuth } from "../../../auth/AuthContext";
 import api from "../../../api";
 
 import {
+  LayoutDashboard,
   LayoutGrid,
   LogOut,
   Map,
@@ -234,7 +235,10 @@ export default function AdminLayout() {
                 : "-translate-x-full md:translate-x-0"
             }`}
         >
-          <nav className="mt-3 p-5 space-y-1 text-sm ">
+          <nav className="p-5 space-y-1 text-sm ">
+            <SectionTitle icon={<LayoutDashboard className="h-4 w-4" />}>
+              DashBoard{" "}
+            </SectionTitle>
             <SideLink to="" end icon={<LayoutGrid className="h-4 w-4" />}>
               Dashboard Overview
             </SideLink>
