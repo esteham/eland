@@ -56,6 +56,11 @@ const AdminMutations = ({ lang }) => {
     }
   };
 
+  const getStatusDisplay = (status) => {
+    if (status === "assigned_to_ac_land") return "Inquiry – Your request is under review";
+    return status;
+  };
+
   const handleViewDetails = (mutation) => {
     setSelectedMutation(mutation);
     setShowModal(true);
@@ -109,6 +114,7 @@ const AdminMutations = ({ lang }) => {
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
             <option value="pending_payment">Pending Payment</option>
+            <option value="assigned_to_ac_land">Assigned to AC Land</option>
           </select>
           <button
             onClick={fetchMutations}
@@ -162,10 +168,12 @@ const AdminMutations = ({ lang }) => {
                         ? "bg-yellow-100 text-yellow-800"
                         : mutation.status === "rejected"
                         ? "bg-red-100 text-red-800"
+                        : mutation.status === "assigned_to_ac_land"
+                        ? "bg-purple-100 text-purple-800"
                         : "bg-blue-100 text-blue-800"
                     }`}
                   >
-                    {mutation.status}
+                    {getStatusDisplay(mutation.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -197,6 +205,7 @@ const AdminMutations = ({ lang }) => {
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                     <option value="pending_payment">Pending Payment</option>
+                    <option value="assigned_to_ac_land">Assigned to AC Land</option>
                   </select>
                 </td>
               </tr>

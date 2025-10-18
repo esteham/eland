@@ -41,7 +41,15 @@ export const deleteNotification = (id) => api.delete(`/notifications/${id}`);
 export const getApplications = (params = {}) =>
   api.get("/applications", { params });
 
-// Mouza Maps
+// Location APIs
+export const getDivisions = () => api.get("/locations/divisions");
+export const getDistricts = (divisionId) =>
+  api.get(`/locations/divisions/${divisionId}/districts`);
+export const getUpazilas = (districtId) =>
+  api.get(`/locations/districts/${districtId}/upazilas`);
+export const getMouzas = (upazilaId) =>
+  api.get(`/locations/upazilas/${upazilaId}/mouzas`);
+
 export const getMouzaMaps = () => api.get("/admin/mouza-maps");
 export const createMouzaMap = (formData) =>
   api.post("/admin/mouza-maps", formData, {
