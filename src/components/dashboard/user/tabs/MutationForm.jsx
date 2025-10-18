@@ -858,15 +858,28 @@ const MutationForm = ({
               <label className="block text-sm font-medium text-gray-700">
                 {lang === LANGS.BN ? "রেজিস্ট্রি অফিস" : "Registry Office"}
               </label>
-              <input
-                type="text"
+              <select
                 name="registry_office"
                 value={formData.registry_office}
                 onChange={handleInputChange}
                 className="mt-1 block w-full border p-1 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 required
-                disabled={loading}
-              />
+                disabled={!formData.district_id || loading}
+              >
+                <option value="">
+                  {lang === LANGS.BN
+                    ? "রেজিস্ট্রি অফিস নির্বাচন করুন"
+                    : "Select Registry Office"}
+                </option>
+                {upazilas.map((upazila) => (
+                  <option
+                    key={upazila.id}
+                    value={upazila.name_bn || upazila.name_en}
+                  >
+                    {upazila.name_bn || upazila.name_en}
+                  </option>
+                ))}
+              </select>
               {errors.registry_office && (
                 <p className="text-red-500 text-sm">
                   {errors.registry_office[0]}
