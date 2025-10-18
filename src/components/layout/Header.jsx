@@ -30,7 +30,7 @@ export default function Header() {
       home: "হোম",
       landRecords: "ভূমি রেকর্ড",
       landTax: "ভূমি কর",
-      landMap: "Search Dag",
+      landMap: "দাগ অনুসন্ধান",
       dashboard: "ড্যাশবোর্ড",
       adminPanel: "অ্যাডমিন প্যানেল",
       login: "লগইন",

@@ -172,7 +172,7 @@ const PaymentsTab = ({ lang, t }) => {
             active={activeTab === "applications"}
             onClick={() => setActiveTab("applications")}
           >
-            Application Payments
+            Khatiyan And Maps
           </TabButton>
           <TabButton
             active={activeTab === "mutations"}

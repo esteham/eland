@@ -112,7 +112,7 @@ const TEXTS = {
     hide: "Hide",
 
     // Misc
-    yourSubmittedApps: "Your Submitted Applications",
+    yourSubmittedApps: "Your Khatiyan And Maps",
     notificationsHere: "Notifications and messages appear here.",
     startNewBnHint: "(New Application)",
     appliedKhatianBnHint: "(Applied Khatiyan)",
@@ -232,7 +232,7 @@ const TEXTS = {
     hide: "লুকান",
 
     // Misc
-    yourSubmittedApps: "আপনার সাবমিট করা আবেদনসমূহ",
+    yourSubmittedApps: "আপনার খতিয়ান এবং ম্যাপ",
     notificationsHere: "নোটিফিকেশন ও বার্তাগুলো এখানে দেখা যাবে।",
     startNewBnHint: "(নতুন আবেদন)",
     appliedKhatianBnHint: "(আবেদন করা খতিয়ান)",
