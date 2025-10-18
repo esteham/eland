@@ -8,14 +8,13 @@ import {
   FileText,
   Receipt,
   Download,
-  Eye,
 } from "lucide-react";
 
 export default function AdminRevenue() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [selectedSection, setSelectedSection] = useState(null); // 'applications' or 'land-tax-payments'
+  const [selectedSection, setSelectedSection] = useState(null); // 'applications', 'land-tax-payments', or 'mutations'
   const [selectedDate, setSelectedDate] = useState("");
   const [detailsData, setDetailsData] = useState([]);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -79,6 +78,7 @@ export default function AdminRevenue() {
 
   const applications = data?.applications || {};
   const landTaxPayments = data?.land_tax_payments || {};
+  const mutations = data?.mutations || {};
 
   const handleViewDetails = (section) => {
     setSelectedSection(section);
@@ -95,7 +95,14 @@ export default function AdminRevenue() {
     if (!selectedDate) return;
     setDetailsLoading(true);
     setDetailsErr("");
-    const endpoint = selectedSection === 'applications' ? `/admin/revenue/applications/${selectedDate}` : `/admin/revenue/land-tax-payments/${selectedDate}`;
+    let endpoint;
+    if (selectedSection === 'applications') {
+      endpoint = `/admin/revenue/applications/${selectedDate}`;
+    } else if (selectedSection === 'land-tax-payments') {
+      endpoint = `/admin/revenue/land-tax-payments/${selectedDate}`;
+    } else if (selectedSection === 'mutations') {
+      endpoint = `/admin/revenue/mutations/${selectedDate}`;
+    }
     api.get(endpoint)
       .then(({ data }) => {
         setDetailsData(data);
@@ -108,7 +115,14 @@ export default function AdminRevenue() {
 
   const downloadCSV = () => {
     if (!selectedDate) return;
-    const endpoint = selectedSection === 'applications' ? `/admin/revenue/applications/${selectedDate}/csv` : `/admin/revenue/land-tax-payments/${selectedDate}/csv`;
+    let endpoint;
+    if (selectedSection === 'applications') {
+      endpoint = `/admin/revenue/applications/${selectedDate}/csv`;
+    } else if (selectedSection === 'land-tax-payments') {
+      endpoint = `/admin/revenue/land-tax-payments/${selectedDate}/csv`;
+    } else if (selectedSection === 'mutations') {
+      endpoint = `/admin/revenue/mutations/${selectedDate}/csv`;
+    }
     api.get(endpoint, { responseType: 'blob' })
       .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -166,6 +180,16 @@ export default function AdminRevenue() {
         >
           Land Tax Payments Revenue
         </button>
+        <button
+          onClick={() => handleViewDetails('mutations')}
+          className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-200 ${
+            selectedSection === 'mutations'
+              ? 'bg-purple-500 text-white shadow-lg'
+              : 'bg-white/80 text-gray-800 hover:bg-white shadow-md'
+          }`}
+        >
+          Mutations Revenue
+        </button>
       </div>
 
       {/* Details Modal/Section */}
@@ -173,7 +197,7 @@ export default function AdminRevenue() {
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-800">
-              {selectedSection === 'applications' ? 'Applications Revenue Details' : 'Land Tax Payments Revenue Details'}
+              {selectedSection === 'applications' ? 'Applications Revenue Details' : selectedSection === 'land-tax-payments' ? 'Land Tax Payments Revenue Details' : 'Mutations Revenue Details'}
             </h3>
             <button
               onClick={() => setSelectedSection(null)}
@@ -344,6 +368,68 @@ export default function AdminRevenue() {
                 ))
               ) : (
                 <p className="text-sm text-gray-500">No recent land tax payments</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mutations Revenue */}
+      {(!selectedSection || selectedSection === 'mutations') && (
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-purple-600" />
+            <h3 className="text-lg font-semibold text-gray-800">
+              Mutations Revenue
+            </h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl text-white mb-3">
+                <Calendar className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">Daily</p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(mutations.daily ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl text-white mb-3">
+                <BarChart3 className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">Monthly</p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(mutations.monthly ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="p-4 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl text-white mb-3">
+                <TrendingUp className="h-8 w-8 mx-auto" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium mb-1">Yearly</p>
+              <p className="text-2xl font-bold text-gray-800">
+                BDT {Number(mutations.yearly ?? 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          {/* Recent Mutations */}
+          <div className="mt-6">
+            <h4 className="text-md font-semibold text-gray-700 mb-4">Recent Mutations</h4>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {mutations.recent?.length > 0 ? (
+                mutations.recent.map((mutation) => (
+                  <div key={mutation.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-600">Mutation #{mutation.id}</span>
+                    <span className="text-sm font-medium text-gray-800">
+                      BDT {Number(mutation.fee_amount).toLocaleString()}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(mutation.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No recent mutations</p>
               )}
             </div>
           </div>
