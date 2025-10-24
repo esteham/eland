@@ -1,45 +1,65 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import {
+  Menu,
+  X,
+  Globe,
+  ChevronDown,
+  Shield,
+  LayoutDashboard,
+  MapPinned,
+} from "lucide-react";
 
 import LogoHeader from "../../../public/images/LogoHeader.png";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { language, toggleLanguage } = useLanguage();
 
-  const translations = {
-    en: {
-      home: "Home",
-      landRecords: "Land Records",
-      landTax: "Land TAX",
-      landMap: "Search Dag",
-      dashboard: "Dashboard",
-      adminPanel: "Admin Panel",
-      login: "Login",
-      register: "Register",
-      logout: "Logout",
-      welcome: "Welcome",
-      toggle: "বাংলা",
-    },
-    bn: {
-      home: "হোম",
-      landRecords: "ভূমি রেকর্ড",
-      landTax: "ভূমি কর",
-      landMap: "দাগ অনুসন্ধান",
-      dashboard: "ড্যাশবোর্ড",
-      adminPanel: "অ্যাডমিন প্যানেল",
-      login: "লগইন",
-      register: "রেজিস্টার",
-      logout: "লগআউট",
-      welcome: "স্বাগতম",
-      toggle: "English",
-    },
-  };
+  // Close mobile on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  const t = useMemo(
+    () =>
+      ({
+        en: {
+          home: "Home",
+          landRecords: "Land Records",
+          landTax: "Land TAX",
+          landMap: "Search Dag",
+          dashboard: "Dashboard",
+          adminPanel: "Admin Panel",
+          login: "Login",
+          register: "Register",
+          logout: "Logout",
+          welcome: "Welcome",
+          toggle: "বাংলা",
+          profile: "Profile",
+        },
+        bn: {
+          home: "হোম",
+          landRecords: "ভূমি রেকর্ড",
+          landTax: "ভূমি কর",
+          landMap: "দাগ অনুসন্ধান",
+          dashboard: "ড্যাশবোর্ড",
+          adminPanel: "অ্যাডমিন প্যানেল",
+          login: "লগইন",
+          register: "রেজিস্টার",
+          logout: "লগআউট",
+          welcome: "স্বাগতম",
+          toggle: "English",
+          profile: "প্রোফাইল",
+        },
+      }[language]),
+    [language]
+  );
 
   const handleLogout = () => {
     logout();
@@ -47,291 +67,289 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div
-              className=" w-30 h-14 flex items-center justify-center"
-              style={{
-                backgroundImage: `url(${LogoHeader})`,
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "contain",
-                backgroundPosition: "center",
-                filter: "brightness(1)",
-                pointerEvents: "none",
-              }}
-              aria-hidden="true"
-            />
-          </Link>
+    <header className="sticky top-0 z-50">
+      {/* Top border glow */}
+      <div className="h-[1px] w-full bg-gradient-to-r from-indigo-500/60 via-sky-400/60 to-fuchsia-500/60" />
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className={`font-medium transition duration-300 ${
-                location.pathname === "/"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
-              }`}
-            >
-              {translations[language].home}
-            </Link>
-            <Link
-              to="/land"
-              className={`font-medium transition duration-300 ${
-                location.pathname === "/land"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
-              }`}
-            >
-              {translations[language].landRecords}
-            </Link>
-
-            <Link
-              to="/land-tax"
-              className={`font-medium transition duration-300 ${
-                location.pathname === "/land-tax"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
-              }`}
-            >
-              {translations[language].landTax}
-            </Link>
-
-            <Link
-              to="/dag-search-map"
-              className={`font-medium transition duration-300 ${
-                location.pathname === "/dag-search-map"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
-              }`}
-            >
-              {translations[language].landMap}
-            </Link>
-            {/* Show Dashboard for all logged-in users */}
-            {user && (
-              <Link
-                to="/dashboard"
-                className={`font-medium transition duration-300 ${
-                  location.pathname === "/dashboard"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                {translations[language].dashboard}
-              </Link>
-            )}
-
-            {/* Show Admin Panel only for admin/acland */}
-            {(user?.role === "admin" || user?.role === "acland") && (
-              <Link
-                to="/admin"
-                className={`font-medium transition duration-300 ${
-                  location.pathname.startsWith("/admin")
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                {translations[language].adminPanel}
-              </Link>
-            )}
-          </nav>
-
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={toggleLanguage}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300"
-            >
-              {translations[language].toggle}
-            </button>
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">
-                  {translations[language].welcome}, {user.name}
-                </span>
-
-                {/* <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {user.role}
-                </span> */}
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300"
-                >
-                  {translations[language].logout}
-                </button>
-              </div>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-blue-600 font-medium transition duration-300"
-                >
-                  {translations[language].login}
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition duration-300 shadow-lg hover:shadow-xl"
-                >
-                  {translations[language].register}
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
+      <div className="backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/70 border-b border-slate-200/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            {/* Brand */}
+            <Link to="/" className="flex items-center gap-3">
+              <span
+                className="h-10 w-40 bg-contain bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${LogoHeader})` }}
+                aria-hidden
               />
-            </svg>
-          </button>
-        </div>
+              <span className="sr-only">E‑Land</span>
+            </Link>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="flex flex-col space-y-1 px-4 py-4">
-              {/* Language Toggle */}
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+              <NavItem
+                to="/"
+                label={t.home}
+                active={location.pathname === "/"}
+              />
+              <NavItem
+                to="/land"
+                label={t.landRecords}
+                active={location.pathname === "/land"}
+              />
+              <NavItem
+                to="/land-tax"
+                label={t.landTax}
+                active={location.pathname === "/land-tax"}
+              />
+              <NavItem
+                to="/dag-search-map"
+                label={t.landMap}
+                active={location.pathname === "/dag-search-map"}
+                icon={<MapPinned className="h-4 w-4" />}
+              />
+
+              {user && (
+                <NavItem
+                  to="/dashboard"
+                  label={t.dashboard}
+                  active={location.pathname === "/dashboard"}
+                  icon={<LayoutDashboard className="h-4 w-4" />}
+                />
+              )}
+              {(user?.role === "admin" || user?.role === "acland") && (
+                <NavItem
+                  to="/admin"
+                  label={t.adminPanel}
+                  active={location.pathname.startsWith("/admin")}
+                  icon={<Shield className="h-4 w-4" />}
+                />
+              )}
+            </nav>
+
+            {/* Right controls */}
+            <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={toggleLanguage}
-                className="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg transition duration-300 text-center"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white/70 px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                aria-label="Toggle language"
               >
-                {translations[language].toggle}
+                <Globe className="h-4 w-4" /> {t.toggle}
               </button>
 
-              {/* Mobile navigation links */}
-              <Link
+              {user ? (
+                <div className="relative group">
+                  <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
+                    <Avatar name={user.name} />
+                    <span className="max-w-[10rem] truncate text-left">
+                      {user.name}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-80" />
+                  </button>
+                  {/* Dropdown */}
+                  <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-lg">
+                    <div className="p-2 text-sm">
+                      <div className="px-3 py-2 text-slate-600">
+                        <div className="font-medium">
+                          {t.welcome}, {user.name.split(" ")[0]}
+                        </div>
+                        {user?.role && (
+                          <span className="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-200">
+                            {user.role}
+                          </span>
+                        )}
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-50 text-slate-700"
+                      >
+                        <span className="h-2 w-2 rounded-full bg-emerald-500" />{" "}
+                        {t.profile}
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left rounded-lg px-3 py-2 hover:bg-slate-50 text-red-600 font-semibold"
+                      >
+                        {t.logout}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/login"
+                    className="rounded-lg border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                  >
+                    {t.login}
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
+                  >
+                    {t.register}
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile toggle */}
+            <button
+              className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-700 hover:bg-slate-100"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-label="Toggle menu"
+            >
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile drawer */}
+        <div
+          className={`md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ${
+            open ? "max-h-[520px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="mx-auto max-w-7xl px-4 pb-4">
+            <div className="grid gap-2">
+              <button
+                onClick={toggleLanguage}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-3 font-semibold text-slate-800"
+              >
+                <Globe className="h-4 w-4" /> {t.toggle}
+              </button>
+
+              <MobileItem
                 to="/"
-                className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                  location.pathname === "/"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {translations[language].home}
-              </Link>
-              <Link
+                label={t.home}
+                active={location.pathname === "/"}
+              />
+              <MobileItem
                 to="/land"
-                className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                  location.pathname === "/land"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {translations[language].landRecords}
-              </Link>
-
-              <Link
+                label={t.landRecords}
+                active={location.pathname === "/land"}
+              />
+              <MobileItem
                 to="/land-tax"
-                className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                  location.pathname === "/land-tax"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {translations[language].landTax}
-              </Link>
-
-              <Link
+                label={t.landTax}
+                active={location.pathname === "/land-tax"}
+              />
+              <MobileItem
                 to="/dag-search-map"
-                className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                  location.pathname === "/dag-search-map"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {translations[language].landMap}
-              </Link>
+                label={t.landMap}
+                active={location.pathname === "/dag-search-map"}
+                icon={<MapPinned className="h-4 w-4" />}
+              />
 
-              {/* Show Dashboard for all logged-in users */}
               {user && (
-                <Link
+                <MobileItem
                   to="/dashboard"
-                  className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                    location.pathname === "/dashboard"
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {translations[language].dashboard}
-                </Link>
+                  label={t.dashboard}
+                  active={location.pathname === "/dashboard"}
+                  icon={<LayoutDashboard className="h-4 w-4" />}
+                />
               )}
-
-              {/* Show Admin Panel only for admin/acland */}
               {(user?.role === "admin" || user?.role === "acland") && (
-                <Link
+                <MobileItem
                   to="/admin"
-                  className={`block py-3 px-4 rounded-lg font-medium transition duration-300 ${
-                    location.pathname.startsWith("/admin")
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {translations[language].adminPanel}
-                </Link>
+                  label={t.adminPanel}
+                  active={location.pathname.startsWith("/admin")}
+                  icon={<Shield className="h-4 w-4" />}
+                />
               )}
 
-              {/* Mobile Auth Section */}
-              <div className="border-t border-gray-200 mt-4 pt-4">
+              <div className="mt-3 border-t border-slate-200 pt-3">
                 {user ? (
-                  <div className="flex flex-col space-y-3">
-                    <div className="px-4 py-2 text-gray-700">
-                      {translations[language].welcome}, {user.name}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Avatar name={user.name} />
+                      <div className="leading-tight">
+                        <div className="font-medium">{user.name}</div>
+                        {user?.role && (
+                          <div className="text-[11px] text-slate-500">
+                            {user.role}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-40 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium transition duration-300 text-left"
+                      onClick={handleLogout}
+                      className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white"
                     >
-                      {translations[language].logout}
+                      {t.logout}
                     </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <Link
                       to="/login"
-                      className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition duration-300 text-center"
-                      onClick={() => setIsMenuOpen(false)}
+                      className="rounded-lg bg-slate-100 px-4 py-3 text-center font-semibold text-slate-800"
                     >
-                      {translations[language].login}
+                      {t.login}
                     </Link>
                     <Link
                       to="/register"
-                      className="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition duration-300 text-center shadow-lg hover:shadow-xl"
-                      onClick={() => setIsMenuOpen(false)}
+                      className="rounded-lg bg-indigo-600 px-4 py-3 text-center font-semibold text-white"
                     >
-                      {translations[language].register}
+                      {t.register}
                     </Link>
                   </div>
                 )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </header>
+  );
+}
+
+function NavItem({ to, label, active, icon }) {
+  return (
+    <Link
+      to={to}
+      className={`relative inline-flex items-center gap-1 px-1.5 py-2 transition-colors ${
+        active ? "text-indigo-700" : "text-slate-700 hover:text-indigo-700"
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+      {/* Active underline */}
+      <span
+        className={`absolute left-0 -bottom-0.5 h-[2px] rounded-full bg-indigo-600 transition-all ${
+          active ? "w-full" : "w-0 group-hover:w-full"
+        }`}
+      />
+    </Link>
+  );
+}
+
+function MobileItem({ to, label, active, icon }) {
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold ${
+        active
+          ? "bg-indigo-50 text-indigo-700"
+          : "text-slate-700 hover:bg-slate-100"
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function Avatar({ name }) {
+  const initials = (name || "?")
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  return (
+    <div className="grid h-6 w-6 place-items-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-700 border border-indigo-200">
+      {initials}
+    </div>
   );
 }
