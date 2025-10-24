@@ -62,7 +62,7 @@ export default function HomePage() {
       {/* Floating logo watermark - more subtle */}
       <div
         aria-hidden
-        className="fixed top-32 right-4 h-[35vh] w-[35vw] max-w-[480px] hidden xl:block opacity-[0.33]"
+        className="fixed top-32 right-4 h-[35vh] w-[35vw] max-w-[480px] hidden xl:block opacity-[0.73]"
         style={{
           backgroundImage: `url(${LogoPng})`,
           backgroundRepeat: "no-repeat",
