@@ -6,7 +6,7 @@ import { Map, SquareGanttChart, Search, X } from "lucide-react";
 
 import khatiyanImg from "../../../public/images/khatiyan.png";
 import mouzaMapImg from "../../../public/images/mouza-map.png";
-import LogoPng from "../../../public/images/background.gif";
+import LogoPng from "../../../public/images/background.png";
 
 // ---------- UI helpers ----------
 const Spinner = ({ className = "w-4 h-4" }) => (

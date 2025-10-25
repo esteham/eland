@@ -21,7 +21,7 @@ import {
 import { useLanguage } from "../../contexts/LanguageContext";
 import { translations } from "../../fonts/HomePageFonts";
 
-import Background from "../../../public/images/background.gif";
+import Background from "../../../public/images/background.png";
 import LogoPng from "../../../public/images/Logo.png";
 
 export default function HomePage() {

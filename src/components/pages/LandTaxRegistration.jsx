@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useAuth } from "../../auth/AuthContext";
 
-import LogoPng from "../../../public/images/background.gif";
+import LogoPng from "../../../public/images/background.png";
 
 // Simple spinner
 function Spinner({ className = "w-4 h-4" }) {

@@ -17,7 +17,7 @@ import MessagesTab from "./tabs/MessagesTab";
 import SecurityTab from "./tabs/SecurityTab";
 import MutationList from "./tabs/MutationList";
 
-import LogoPng from "../../../../public/images/background.gif";
+import LogoPng from "../../../../public/images/background.png";
 
 const NAV_KEYS = [
   "personalInfo",
