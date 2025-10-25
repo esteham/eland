@@ -2,6 +2,8 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   MapPinned,
   Database,
@@ -19,7 +21,8 @@ import {
 import { useLanguage } from "../../contexts/LanguageContext";
 import { translations } from "../../fonts/HomePageFonts";
 
-import LogoPng from "../../../public/images/logo.png";
+import Background from "../../../public/images/background.gif";
+import LogoPng from "../../../public/images/Logo.png";
 
 export default function HomePage() {
   const { language } = useLanguage();
@@ -62,7 +65,18 @@ export default function HomePage() {
       {/* Floating logo watermark - more subtle */}
       <div
         aria-hidden
-        className="fixed top-32 right-4 h-[35vh] w-[35vw] max-w-[480px] hidden xl:block opacity-[0.73]"
+        className="fixed  h-[100vh] w-[150vw]  hidden xl:block opacity-[0.65]"
+        style={{
+          backgroundImage: `url(${Background})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+      {/* Floating logo watermark - more subtle */}
+      <div
+        aria-hidden
+        className="fixed  h-[35vh] w-[35vw] max-w-[480px] hidden xl:block opacity-[1]"
         style={{
           backgroundImage: `url(${LogoPng})`,
           backgroundRepeat: "no-repeat",
@@ -101,14 +115,14 @@ export default function HomePage() {
 
             <motion.p
               variants={fadeUp}
-              className="mt-6 text-xl sm:text-2xl text-slate-600 font-light leading-relaxed max-w-3xl mx-auto"
+              className="mt-6 text-l sm:text-xl  font-semibold leading-relaxed max-w-3xl mx-auto"
             >
               {t.subtitle}
             </motion.p>
 
             <motion.p
               variants={fadeUp}
-              className="mt-4 text-lg text-slate-500 leading-8 max-w-2xl mx-auto"
+              className="mt-4 text-lg  leading-8 max-w-2xl mx-auto"
             >
               {t.description}
             </motion.p>
@@ -299,7 +313,7 @@ export default function HomePage() {
                     <div className="h-3 w-3 rounded-full bg-green-400"></div>
                   </div>
                   <div className="flex-1 text-center text-sm font-medium text-slate-500">
-                    land-records.gov.bd
+                    eland.xetroot.com
                   </div>
                 </div>
 
@@ -307,26 +321,38 @@ export default function HomePage() {
                   {/* Mock map interface */}
                   <div className="absolute inset-0 grid grid-cols-4 gap-4 p-4">
                     <div className="col-span-1 space-y-3">
-                      <div className="h-3 bg-slate-200 rounded"></div>
-                      <div className="h-3 bg-slate-200 rounded"></div>
-                      <div className="h-3 bg-blue-200 rounded"></div>
-                      <div className="h-3 bg-slate-200 rounded"></div>
+                      <div className="bg-slate-200 rounded text-sm">
+                        Search Dag
+                      </div>
+                      <div className="bg-slate-200 rounded text-sm">
+                        Find Location
+                      </div>
+                      <div className="bg-blue-200 rounded text-sm">Pay LDT</div>
+                      <div className="bg-slate-200 rounded text-sm">
+                        Mutaion
+                      </div>
                     </div>
                     <div className="col-span-3 bg-white rounded-lg border border-slate-200 relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 to-green-100/20"></div>
-                      <div className="absolute top-4 left-4 h-8 w-8 bg-blue-500/20 rounded-lg border border-blue-500/30"></div>
-                      <div className="absolute bottom-4 right-4 h-8 w-8 bg-green-500/20 rounded-lg border border-green-500/30"></div>
+                      <MapContainer
+                        center={[23.8041, 90.4152]}
+                        zoom={7}
+                        className="h-full w-full rounded-xl"
+                        zoomControl={false}
+                        attributionControl={false}
+                      >
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution="© OpenStreetMap contributors"
+                        />
+                      </MapContainer>
                     </div>
                   </div>
-
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-slate-200/60 shadow-sm">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <MapPinned className="h-4 w-4" />
-                      <span className="text-sm font-medium">
-                        Interactive Map Preview
-                      </span>
-                    </div>
-                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-7 left-2/11 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-slate-200/60 shadow-sm">
+                <div className="flex items-center gap-2 text-slate-600">
+                  <MapPinned className="h-4 w-4" />
+                  <span className="text-sm font-medium">Interactive Map</span>
                 </div>
               </div>
 

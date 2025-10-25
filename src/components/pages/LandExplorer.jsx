@@ -6,6 +6,7 @@ import { Map, SquareGanttChart, Search, X } from "lucide-react";
 
 import khatiyanImg from "../../../public/images/khatiyan.png";
 import mouzaMapImg from "../../../public/images/mouza-map.png";
+import LogoPng from "../../../public/images/background.gif";
 
 // ---------- UI helpers ----------
 const Spinner = ({ className = "w-4 h-4" }) => (
@@ -455,618 +456,648 @@ export default function LandExplorer() {
 
   // ---------- UI ----------
   return (
-    <div className="min-h-screen relative">
-      {/* Decorative backdrop (right) */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 text-slate-900 relative overflow-hidden">
+      {/* Enhanced background design */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-indigo-100/20 blur-3xl" />
+        <div className="absolute top-1/3 -left-20 h-80 w-80 rounded-full bg-blue-100/20 blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 h-72 w-72 rounded-full bg-emerald-100/10 blur-3xl" />
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(100,116,139,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(100,116,139,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
+      </div>
+
+      {/* Floating logo watermark - more subtle */}
       <div
-        className="fixed top-14 right-0 h-[88vh] w-2/5 hidden md:block z-[1]"
+        aria-hidden
+        className="fixed  h-[100vh] w-[120vw]  hidden xl:block opacity-[0.40]"
         style={{
-          backgroundImage: `url(${
-            selectedType === "khatiyan" ? mouzaMapImg : khatiyanImg
-          })`,
+          backgroundImage: `url(${LogoPng})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: "contain",
+          backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundColor: "transparent",
-          transition: "background-image 900ms ease-in-out",
-          filter: "brightness(.98)",
-          // pointerEvents: "none",
         }}
-        aria-hidden="true"
       />
+      <div className="min-h-screen relative">
+        {/* Decorative backdrop (right) */}
+        <div
+          className="fixed top-14 right-0 h-[88vh] w-2/5 hidden md:block z-[1]"
+          style={{
+            backgroundImage: `url(${
+              selectedType === "khatiyan" ? mouzaMapImg : khatiyanImg
+            })`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "contain",
+            backgroundPosition: "center",
+            backgroundColor: "transparent",
+            transition: "background-image 900ms ease-in-out",
+            filter: "brightness(.98)",
+            // pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        />
 
-      {/* Main content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
-        {/* Type selector */}
-        <Card className="p-4 mb-6 w-200">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSelectedType("khatiyan")}
-              className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl border transition ${
-                selectedType === "khatiyan"
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "hover:bg-gray-50"
-              }`}
-            >
-              <SquareGanttChart className="h-5 w-5" />
-              Khatian
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedType("mouza_map")}
-              className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl border transition ${
-                selectedType === "mouza_map"
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "hover:bg-gray-50"
-              }`}
-            >
-              <Map className="h-5 w-5" />
-              Mouza Map
-            </button>
+        {/* Main content */}
+        <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
+          {/* Type selector */}
+          <Card className="p-4 mb-6 w-200">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSelectedType("khatiyan")}
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl border transition ${
+                  selectedType === "khatiyan"
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "hover:bg-gray-50"
+                }`}
+              >
+                <SquareGanttChart className="h-5 w-5" />
+                Khatian
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedType("mouza_map")}
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl border transition ${
+                  selectedType === "mouza_map"
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "hover:bg-gray-50"
+                }`}
+              >
+                <Map className="h-5 w-5" />
+                Mouza Map
+              </button>
 
-            <div className="ml-auto text-sm text-gray-600 flex items-center gap-2">
-              {(loading || busy) && (
-                <>
-                  <Spinner /> {loading ? "Processing…" : "Loading options…"}
-                </>
-              )}
+              <div className="ml-auto text-sm text-gray-600 flex items-center gap-2">
+                {(loading || busy) && (
+                  <>
+                    <Spinner /> {loading ? "Processing…" : "Loading options…"}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        {error && (
-          <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-md text-sm mb-4">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-md text-sm mb-4">
+              {error}
+            </div>
+          )}
 
-        {/* 3-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT: Geo */}
-          <aside className="lg:col-span-1">
-            <Card className="p-5 lg:sticky lg:top-6 space-y-4">
-              <h2 className="text-base font-semibold">Geolocation</h2>
+          {/* 3-column layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* LEFT: Geo */}
+            <aside className="lg:col-span-1">
+              <Card className="p-5 lg:sticky lg:top-6 space-y-4">
+                <h2 className="text-base font-semibold">Geolocation</h2>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Division</label>
-                <select
-                  className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={divisionId}
-                  onChange={(e) => {
-                    setDivisionId(e.target.value);
-                    setDistrictId("");
-                    setUpazilaId("");
-                    setMouzaId("");
-                    setZilId("");
-                  }}
-                >
-                  <option value="">Select Division</option>
-                  {divisions.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name_bn}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">District</label>
-                <select
-                  className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-                  value={districtId}
-                  onChange={(e) => {
-                    setDistrictId(e.target.value);
-                    setUpazilaId("");
-                    setMouzaId("");
-                    setZilId("");
-                  }}
-                  disabled={!divisionId || loading || busy}
-                >
-                  <option value="">Select District</option>
-                  {districts.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name_bn}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Upazila</label>
-                <select
-                  className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-                  value={upazilaId}
-                  onChange={(e) => {
-                    setUpazilaId(e.target.value);
-                    setMouzaId("");
-                    setZilId("");
-                  }}
-                  disabled={!districtId || loading || busy}
-                >
-                  <option value="">Select Upazila</option>
-                  {upazilas.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name_bn}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Mouza</label>
-                <select
-                  className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-                  value={mouzaId}
-                  onChange={(e) => {
-                    setMouzaId(e.target.value);
-                    setZilId("");
-                  }}
-                  disabled={!upazilaId || loading || busy}
-                >
-                  <option value="">Select Mouza</option>
-                  {mouzas.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name_bn} {m.jl_no ? `(JL: ${m.jl_no})` : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Zil</label>
-                <select
-                  className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-                  value={zilId}
-                  onChange={(e) => setZilId(e.target.value)}
-                  disabled={!mouzaId || loading || busy}
-                >
-                  <option value="">Select Zil</option>
-                  {zils.map((z) => (
-                    <option key={z.id} value={z.id}>
-                      Zil {z.zil_no}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </Card>
-          </aside>
-
-          {/* RIGHT: Main */}
-          <main className="w-90 space-y-8">
-            {/* Survey types */}
-            <Card className="p-5">
-              <h2 className="text-base font-semibold mb-3">Survey Type</h2>
-              {!zilId ? (
-                <p className="text-gray-500">
-                  Select a Zil to view survey types.
-                </p>
-              ) : surveyTypes.length === 0 ? (
-                <p className="text-gray-500">No survey types found.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {surveyTypes.map((st) => (
-                    <Chip
-                      key={st.id}
-                      active={String(selectedSurveyType) === String(st.id)}
-                      onClick={() => setSelectedSurveyType(String(st.id))}
-                    >
-                      {st.code || st.name || `#${st.id}`}
-                    </Chip>
-                  ))}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Division</label>
+                  <select
+                    className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={divisionId}
+                    onChange={(e) => {
+                      setDivisionId(e.target.value);
+                      setDistrictId("");
+                      setUpazilaId("");
+                      setMouzaId("");
+                      setZilId("");
+                    }}
+                  >
+                    <option value="">Select Division</option>
+                    {divisions.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name_bn}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              )}
-            </Card>
 
-            {/* Items + search */}
-            <Card className="p-5">
-              {!zilId || !selectedSurveyType ? (
-                <p className="text-gray-500">
-                  Select a Zil and Survey Type to view{" "}
-                  {selectedType === "khatiyan" ? "Dags" : "Mouza Maps"}.
-                </p>
-              ) : (
-                <>
-                  {/* header with H2 and search bar */}
-                  <div className="flex flex-col  md:flex-row items-start md:items-center justify-between gap-2 mb-4">
-                    <div>
-                      <h2 className="text-base font-semibold">
-                        {selectedType === "khatiyan"
-                          ? "Dags (Plots)"
-                          : "Mouza Maps"}
-                      </h2>
-                      <span className="text-xs text-gray-500">
-                        Showing {filteredItems.length} of{" "}
-                        {selectedType === "khatiyan"
-                          ? dags?.length || 0
-                          : mouzaMaps?.length || 0}
-                      </span>
-                    </div>
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
-                      <div className="relative md:w-30">
-                        <input
-                          type="text"
-                          className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pl-9"
-                          placeholder={
-                            selectedType === "khatiyan"
-                              ? "Search dag no (e.g., 123)"
-                              : "Search mouza map name"
-                          }
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          onKeyDown={onSearchKeyDown}
-                          disabled={!zilId || loading}
-                        />
-                        <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        {search && (
-                          <button
-                            type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            onClick={() => setSearch("")}
-                            aria-label="Clear search"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">District</label>
+                  <select
+                    className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                    value={districtId}
+                    onChange={(e) => {
+                      setDistrictId(e.target.value);
+                      setUpazilaId("");
+                      setMouzaId("");
+                      setZilId("");
+                    }}
+                    disabled={!divisionId || loading || busy}
+                  >
+                    <option value="">Select District</option>
+                    {districts.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name_bn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Upazila</label>
+                  <select
+                    className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                    value={upazilaId}
+                    onChange={(e) => {
+                      setUpazilaId(e.target.value);
+                      setMouzaId("");
+                      setZilId("");
+                    }}
+                    disabled={!districtId || loading || busy}
+                  >
+                    <option value="">Select Upazila</option>
+                    {upazilas.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name_bn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Mouza</label>
+                  <select
+                    className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                    value={mouzaId}
+                    onChange={(e) => {
+                      setMouzaId(e.target.value);
+                      setZilId("");
+                    }}
+                    disabled={!upazilaId || loading || busy}
+                  >
+                    <option value="">Select Mouza</option>
+                    {mouzas.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name_bn} {m.jl_no ? `(JL: ${m.jl_no})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Zil</label>
+                  <select
+                    className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                    value={zilId}
+                    onChange={(e) => setZilId(e.target.value)}
+                    disabled={!mouzaId || loading || busy}
+                  >
+                    <option value="">Select Zil</option>
+                    {zils.map((z) => (
+                      <option key={z.id} value={z.id}>
+                        Zil {z.zil_no}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Card>
+            </aside>
+
+            {/* RIGHT: Main */}
+            <main className="w-90 space-y-8">
+              {/* Survey types */}
+              <Card className="p-5">
+                <h2 className="text-base font-semibold mb-3">Survey Type</h2>
+                {!zilId ? (
+                  <p className="text-gray-500">
+                    Select a Zil to view survey types.
+                  </p>
+                ) : surveyTypes.length === 0 ? (
+                  <p className="text-gray-500">No survey types found.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {surveyTypes.map((st) => (
+                      <Chip
+                        key={st.id}
+                        active={String(selectedSurveyType) === String(st.id)}
+                        onClick={() => setSelectedSurveyType(String(st.id))}
+                      >
+                        {st.code || st.name || `#${st.id}`}
+                      </Chip>
+                    ))}
+                  </div>
+                )}
+              </Card>
+
+              {/* Items + search */}
+              <Card className="p-5">
+                {!zilId || !selectedSurveyType ? (
+                  <p className="text-gray-500">
+                    Select a Zil and Survey Type to view{" "}
+                    {selectedType === "khatiyan" ? "Dags" : "Mouza Maps"}.
+                  </p>
+                ) : (
+                  <>
+                    {/* header with H2 and search bar */}
+                    <div className="flex flex-col  md:flex-row items-start md:items-center justify-between gap-2 mb-4">
+                      <div>
+                        <h2 className="text-base font-semibold">
+                          {selectedType === "khatiyan"
+                            ? "Dags (Plots)"
+                            : "Mouza Maps"}
+                        </h2>
+                        <span className="text-xs text-gray-500">
+                          Showing {filteredItems.length} of{" "}
+                          {selectedType === "khatiyan"
+                            ? dags?.length || 0
+                            : mouzaMaps?.length || 0}
+                        </span>
+                      </div>
+                      <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+                        <div className="relative md:w-30">
+                          <input
+                            type="text"
+                            className="w-full rounded-lg border p-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pl-9"
+                            placeholder={
+                              selectedType === "khatiyan"
+                                ? "Search dag no (e.g., 123)"
+                                : "Search mouza map name"
+                            }
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={onSearchKeyDown}
+                            disabled={!zilId || loading}
+                          />
+                          <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          {search && (
+                            <button
+                              type="button"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                              onClick={() => setSearch("")}
+                              aria-label="Clear search"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* chips list */}
-                  {(selectedType === "khatiyan" ? dags : mouzaMaps).length ===
-                  0 ? (
-                    <p className="text-gray-500">No items found.</p>
-                  ) : filteredItems.length === 0 ? (
-                    <p className="text-gray-500">
-                      No matches for “{debouncedSearch}”.
-                    </p>
-                  ) : selectedType === "khatiyan" ? (
-                    <select
-                      className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      value={dagId}
-                      onChange={(e) => setDagId(e.target.value)}
-                    >
-                      <option value="">Select Dag</option>
-                      {filteredItems.map((item) => (
-                        <option key={item.id} value={String(item.id)}>
-                          Dag {item.dag_no}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {filteredItems.map((item) => {
-                        const active = String(mouzaMapId) === String(item.id);
-                        return (
-                          <Chip
-                            key={item.id}
-                            active={active}
-                            onClick={() => setMouzaMapId(String(item.id))}
-                          >
-                            {item.name}
-                          </Chip>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-            </Card>
-
-            {/* Details */}
-            <Card className="p-5">
-              <h2 className="text-base font-semibold mb-3">
-                {selectedType === "khatiyan"
-                  ? "Khatiyan (Land Record)"
-                  : "Mouza Map Detail"}
-              </h2>
-
-              {selectedType === "khatiyan" ? (
-                !dagId ? (
-                  <p className="text-gray-500">
-                    Select a Dag to view khatiyan.
-                  </p>
-                ) : dagDetail ? (
-                  <div className="space-y-3">
-                    <div className="text-gray-600">Dag: {dagDetail.dag_no}</div>
-                    <pre className="bg-gray-50 p-3 rounded-xl border overflow-auto text-sm">
-                      {JSON.stringify(dagDetail.khotiyan, null, 2)}
-                    </pre>
-                    {dagDetail.document_url && (
-                      <div className="flex gap-4">
-                        <a
-                          className="text-blue-600 underline"
-                          href={dagDetail.document_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          View
-                        </a>
-                        <a
-                          className="text-green-600 underline"
-                          href={dagDetail.document_url}
-                          download
-                        >
-                          Download
-                        </a>
+                    {/* chips list */}
+                    {(selectedType === "khatiyan" ? dags : mouzaMaps).length ===
+                    0 ? (
+                      <p className="text-gray-500">No items found.</p>
+                    ) : filteredItems.length === 0 ? (
+                      <p className="text-gray-500">
+                        No matches for “{debouncedSearch}”.
+                      </p>
+                    ) : selectedType === "khatiyan" ? (
+                      <select
+                        className="w-full rounded-lg border p-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        value={dagId}
+                        onChange={(e) => setDagId(e.target.value)}
+                      >
+                        <option value="">Select Dag</option>
+                        {filteredItems.map((item) => (
+                          <option key={item.id} value={String(item.id)}>
+                            Dag {item.dag_no}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {filteredItems.map((item) => {
+                          const active = String(mouzaMapId) === String(item.id);
+                          return (
+                            <Chip
+                              key={item.id}
+                              active={active}
+                              onClick={() => setMouzaMapId(String(item.id))}
+                            >
+                              {item.name}
+                            </Chip>
+                          );
+                        })}
                       </div>
                     )}
-                    <div>
-                      <button
-                        className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
-                        onClick={() => {
-                          if (!user) {
-                            alert("Please login first");
-                            nav("/login");
-                            return;
-                          }
-                          setShowPaymentSelector(true);
-                        }}
-                        disabled={loading}
-                      >
-                        Submit Khatian Application
-                      </button>
+                  </>
+                )}
+              </Card>
+
+              {/* Details */}
+              <Card className="p-5">
+                <h2 className="text-base font-semibold mb-3">
+                  {selectedType === "khatiyan"
+                    ? "Khatiyan (Land Record)"
+                    : "Mouza Map Detail"}
+                </h2>
+
+                {selectedType === "khatiyan" ? (
+                  !dagId ? (
+                    <p className="text-gray-500">
+                      Select a Dag to view khatiyan.
+                    </p>
+                  ) : dagDetail ? (
+                    <div className="space-y-3">
+                      <div className="text-gray-600">
+                        Dag: {dagDetail.dag_no}
+                      </div>
+                      <pre className="bg-gray-50 p-3 rounded-xl border overflow-auto text-sm">
+                        {JSON.stringify(dagDetail.khotiyan, null, 2)}
+                      </pre>
+                      {dagDetail.document_url && (
+                        <div className="flex gap-4">
+                          <a
+                            className="text-blue-600 underline"
+                            href={dagDetail.document_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View
+                          </a>
+                          <a
+                            className="text-green-600 underline"
+                            href={dagDetail.document_url}
+                            download
+                          >
+                            Download
+                          </a>
+                        </div>
+                      )}
+                      <div>
+                        <button
+                          className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+                          onClick={() => {
+                            if (!user) {
+                              alert("Please login first");
+                              nav("/login");
+                              return;
+                            }
+                            setShowPaymentSelector(true);
+                          }}
+                          disabled={loading}
+                        >
+                          Submit Khatian Application
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 text-gray-500">
+                      <Spinner /> Loading…
+                    </div>
+                  )
+                ) : !mouzaMapId ? (
+                  <p className="text-gray-500">
+                    Select a Mouza Map to view details.
+                  </p>
+                ) : mouzaMapDetail ? (
+                  <div className="space-y-3">
+                    <div className="text-gray-600">
+                      Mouza Map: {mouzaMapDetail.name}
+                    </div>
+                    <button
+                      className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+                      onClick={() => {
+                        if (!user) {
+                          alert("Please login first");
+                          nav("/login");
+                          return;
+                        }
+                        setShowPaymentSelector(true);
+                      }}
+                      disabled={loading}
+                    >
+                      Submit Mouza Map Application
+                    </button>
                   </div>
                 ) : (
                   <div className="inline-flex items-center gap-2 text-gray-500">
                     <Spinner /> Loading…
                   </div>
-                )
-              ) : !mouzaMapId ? (
-                <p className="text-gray-500">
-                  Select a Mouza Map to view details.
-                </p>
-              ) : mouzaMapDetail ? (
-                <div className="space-y-3">
-                  <div className="text-gray-600">
-                    Mouza Map: {mouzaMapDetail.name}
-                  </div>
-                  <button
-                    className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
-                    onClick={() => {
-                      if (!user) {
-                        alert("Please login first");
-                        nav("/login");
-                        return;
-                      }
-                      setShowPaymentSelector(true);
-                    }}
-                    disabled={loading}
-                  >
-                    Submit Mouza Map Application
-                  </button>
+                )}
+              </Card>
+            </main>
+          </div>
+        </div>
+
+        {/* Payment Modal */}
+        {showPaymentSelector && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+            <Card className="w-full max-w-md p-6">
+              <div className="mb-3">
+                <p className="text-sm text-gray-600">You are paying for</p>
+                <div className="mt-1 text-gray-800 font-medium">
+                  {selectedType === "khatiyan"
+                    ? `Dag: ${dagDetail?.dag_no ?? ""}`
+                    : `Mouza Map: ${mouzaMapDetail?.name ?? ""}`}
                 </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 text-gray-500">
-                  <Spinner /> Loading…
+                <p className="text-sm text-gray-600">
+                  Amount: <span className="font-semibold">BDT {amount}</span>
+                </p>
+              </div>
+
+              <h3 className="text-base font-semibold mb-3">
+                Select Payment Method
+              </h3>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {["bKash", "Nagad", "Online"].map((m) => (
+                  <button
+                    key={m}
+                    className={`rounded-lg px-3 py-2 border text-sm transition ${
+                      selectedPaymentMethod === m
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "hover:bg-gray-50"
+                    }`}
+                    onClick={() => {
+                      setSelectedPaymentMethod(m);
+                      setPaymentErrors({});
+                    }}
+                  >
+                    {m === "Online" ? "Online (Card)" : m}
+                  </button>
+                ))}
+              </div>
+
+              {selectedPaymentMethod && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">
+                    Enter {selectedPaymentMethod} Details
+                  </h4>
+
+                  {selectedPaymentMethod === "bKash" ||
+                  selectedPaymentMethod === "Nagad" ? (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Phone Number (01XXXXXXXXX)"
+                        className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        value={paymentCredentials.phone || ""}
+                        onChange={(e) =>
+                          setPaymentCredentials({
+                            ...paymentCredentials,
+                            phone: e.target.value,
+                          })
+                        }
+                      />
+                      {paymentErrors.phone && (
+                        <p className="text-red-600 text-sm">
+                          {paymentErrors.phone}
+                        </p>
+                      )}
+                      <input
+                        type="password"
+                        placeholder="PIN (4-5 digits)"
+                        className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        value={paymentCredentials.pin || ""}
+                        onChange={(e) =>
+                          setPaymentCredentials({
+                            ...paymentCredentials,
+                            pin: e.target.value,
+                          })
+                        }
+                      />
+                      {paymentErrors.pin && (
+                        <p className="text-red-600 text-sm">
+                          {paymentErrors.pin}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Card Number"
+                        className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        value={paymentCredentials.cardNumber || ""}
+                        onChange={(e) =>
+                          setPaymentCredentials({
+                            ...paymentCredentials,
+                            cardNumber: e.target.value,
+                          })
+                        }
+                      />
+                      {paymentErrors.cardNumber && (
+                        <p className="text-red-600 text-sm">
+                          {paymentErrors.cardNumber}
+                        </p>
+                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Expiry (MM/YY)"
+                          className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          value={paymentCredentials.expiry || ""}
+                          onChange={(e) =>
+                            setPaymentCredentials({
+                              ...paymentCredentials,
+                              expiry: e.target.value,
+                            })
+                          }
+                        />
+                        <input
+                          type="password"
+                          placeholder="CVV"
+                          className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          value={paymentCredentials.cvv || ""}
+                          onChange={(e) =>
+                            setPaymentCredentials({
+                              ...paymentCredentials,
+                              cvv: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      {paymentErrors.expiry && (
+                        <p className="text-red-600 text-sm">
+                          {paymentErrors.expiry}
+                        </p>
+                      )}
+                      {paymentErrors.cvv && (
+                        <p className="text-red-600 text-sm">
+                          {paymentErrors.cvv}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
-            </Card>
-          </main>
-        </div>
-      </div>
 
-      {/* Payment Modal */}
-      {showPaymentSelector && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-          <Card className="w-full max-w-md p-6">
-            <div className="mb-3">
-              <p className="text-sm text-gray-600">You are paying for</p>
-              <div className="mt-1 text-gray-800 font-medium">
-                {selectedType === "khatiyan"
-                  ? `Dag: ${dagDetail?.dag_no ?? ""}`
-                  : `Mouza Map: ${mouzaMapDetail?.name ?? ""}`}
-              </div>
-              <p className="text-sm text-gray-600">
-                Amount: <span className="font-semibold">BDT {amount}</span>
-              </p>
-            </div>
-
-            <h3 className="text-base font-semibold mb-3">
-              Select Payment Method
-            </h3>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {["bKash", "Nagad", "Online"].map((m) => (
+              <div className="mt-5 flex items-center justify-end gap-2">
                 <button
-                  key={m}
-                  className={`rounded-lg px-3 py-2 border text-sm transition ${
-                    selectedPaymentMethod === m
-                      ? "bg-indigo-600 text-white border-indigo-600"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className="px-4 py-2 rounded-lg border hover:bg-gray-50"
                   onClick={() => {
-                    setSelectedPaymentMethod(m);
+                    setShowPaymentSelector(false);
+                    setSelectedPaymentMethod("");
+                    setPaymentCredentials({});
                     setPaymentErrors({});
                   }}
                 >
-                  {m === "Online" ? "Online (Card)" : m}
+                  Cancel
                 </button>
-              ))}
-            </div>
+                <button
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
+                  onClick={() => {
+                    setPaymentErrors({});
+                    if (!selectedPaymentMethod) return;
 
-            {selectedPaymentMethod && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">
-                  Enter {selectedPaymentMethod} Details
-                </h4>
-
-                {selectedPaymentMethod === "bKash" ||
-                selectedPaymentMethod === "Nagad" ? (
-                  <>
-                    <input
-                      type="text"
-                      placeholder="Phone Number (01XXXXXXXXX)"
-                      className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      value={paymentCredentials.phone || ""}
-                      onChange={(e) =>
-                        setPaymentCredentials({
-                          ...paymentCredentials,
-                          phone: e.target.value,
-                        })
+                    if (
+                      selectedPaymentMethod === "bKash" ||
+                      selectedPaymentMethod === "Nagad"
+                    ) {
+                      if (!/^01\d{9}$/.test(paymentCredentials.phone || "")) {
+                        setPaymentErrors({
+                          phone: "Please enter a valid phone number",
+                        });
+                        return;
                       }
-                    />
-                    {paymentErrors.phone && (
-                      <p className="text-red-600 text-sm">
-                        {paymentErrors.phone}
-                      </p>
-                    )}
-                    <input
-                      type="password"
-                      placeholder="PIN (4-5 digits)"
-                      className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      value={paymentCredentials.pin || ""}
-                      onChange={(e) =>
-                        setPaymentCredentials({
-                          ...paymentCredentials,
-                          pin: e.target.value,
-                        })
+                      if (!/^\d{4,5}$/.test(paymentCredentials.pin || "")) {
+                        setPaymentErrors({ pin: "PIN must be 4-5 digits." });
+                        return;
                       }
-                    />
-                    {paymentErrors.pin && (
-                      <p className="text-red-600 text-sm">
-                        {paymentErrors.pin}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="text"
-                      placeholder="Card Number"
-                      className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      value={paymentCredentials.cardNumber || ""}
-                      onChange={(e) =>
-                        setPaymentCredentials({
-                          ...paymentCredentials,
-                          cardNumber: e.target.value,
-                        })
-                      }
-                    />
-                    {paymentErrors.cardNumber && (
-                      <p className="text-red-600 text-sm">
-                        {paymentErrors.cardNumber}
-                      </p>
-                    )}
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        placeholder="Expiry (MM/YY)"
-                        className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        value={paymentCredentials.expiry || ""}
-                        onChange={(e) =>
-                          setPaymentCredentials({
-                            ...paymentCredentials,
-                            expiry: e.target.value,
-                          })
-                        }
-                      />
-                      <input
-                        type="password"
-                        placeholder="CVV"
-                        className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        value={paymentCredentials.cvv || ""}
-                        onChange={(e) =>
-                          setPaymentCredentials({
-                            ...paymentCredentials,
-                            cvv: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    {paymentErrors.expiry && (
-                      <p className="text-red-600 text-sm">
-                        {paymentErrors.expiry}
-                      </p>
-                    )}
-                    {paymentErrors.cvv && (
-                      <p className="text-red-600 text-sm">
-                        {paymentErrors.cvv}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+                      const payer = paymentCredentials.phone;
+                      alert("Payment successful!");
+                      setShowPaymentSelector(false);
+                      setSelectedPaymentMethod("");
+                      setPaymentCredentials({});
+                      handleSubmitApplication(
+                        amount,
+                        selectedPaymentMethod,
+                        payer
+                      );
+                      return;
+                    }
 
-            <div className="mt-5 flex items-center justify-end gap-2">
-              <button
-                className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-                onClick={() => {
-                  setShowPaymentSelector(false);
-                  setSelectedPaymentMethod("");
-                  setPaymentCredentials({});
-                  setPaymentErrors({});
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
-                onClick={() => {
-                  setPaymentErrors({});
-                  if (!selectedPaymentMethod) return;
-
-                  if (
-                    selectedPaymentMethod === "bKash" ||
-                    selectedPaymentMethod === "Nagad"
-                  ) {
-                    if (!/^01\d{9}$/.test(paymentCredentials.phone || "")) {
+                    // Online
+                    if (
+                      !/^\d{12,19}$/.test(
+                        (paymentCredentials.cardNumber || "").replace(
+                          /\s+/g,
+                          ""
+                        )
+                      )
+                    ) {
                       setPaymentErrors({
-                        phone: "Please enter a valid phone number",
+                        cardNumber: "Please provide a valid card number",
                       });
                       return;
                     }
-                    if (!/^\d{4,5}$/.test(paymentCredentials.pin || "")) {
-                      setPaymentErrors({ pin: "PIN must be 4-5 digits." });
+                    if (
+                      !/^\d{2}\/\d{2}$/.test(paymentCredentials.expiry || "")
+                    ) {
+                      setPaymentErrors({ expiry: "Use MM/YY format" });
                       return;
                     }
-                    const payer = paymentCredentials.phone;
+                    if (!/^\d{3}$/.test(paymentCredentials.cvv || "")) {
+                      setPaymentErrors({ cvv: "Invalid CVV" });
+                      return;
+                    }
+                    const payer = paymentCredentials.cardNumber;
                     alert("Payment successful!");
                     setShowPaymentSelector(false);
                     setSelectedPaymentMethod("");
                     setPaymentCredentials({});
-                    handleSubmitApplication(
-                      amount,
-                      selectedPaymentMethod,
-                      payer
-                    );
-                    return;
-                  }
-
-                  // Online
-                  if (
-                    !/^\d{12,19}$/.test(
-                      (paymentCredentials.cardNumber || "").replace(/\s+/g, "")
-                    )
-                  ) {
-                    setPaymentErrors({
-                      cardNumber: "Please provide a valid card number",
-                    });
-                    return;
-                  }
-                  if (!/^\d{2}\/\d{2}$/.test(paymentCredentials.expiry || "")) {
-                    setPaymentErrors({ expiry: "Use MM/YY format" });
-                    return;
-                  }
-                  if (!/^\d{3}$/.test(paymentCredentials.cvv || "")) {
-                    setPaymentErrors({ cvv: "Invalid CVV" });
-                    return;
-                  }
-                  const payer = paymentCredentials.cardNumber;
-                  alert("Payment successful!");
-                  setShowPaymentSelector(false);
-                  setSelectedPaymentMethod("");
-                  setPaymentCredentials({});
-                  handleSubmitApplication(amount, "Online", payer);
-                }}
-                disabled={loading || !selectedPaymentMethod}
-              >
-                Pay BDT {amount}
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
+                    handleSubmitApplication(amount, "Online", payer);
+                  }}
+                  disabled={loading || !selectedPaymentMethod}
+                >
+                  Pay BDT {amount}
+                </button>
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

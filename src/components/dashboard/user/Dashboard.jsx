@@ -17,6 +17,8 @@ import MessagesTab from "./tabs/MessagesTab";
 import SecurityTab from "./tabs/SecurityTab";
 import MutationList from "./tabs/MutationList";
 
+import LogoPng from "../../../../public/images/background.gif";
+
 const NAV_KEYS = [
   "personalInfo",
   "address",
@@ -119,39 +121,64 @@ export default function UserDashboard() {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Sidebar */}
-          <div className="col-span-12 md:col-span-4 bg-white shadow-lg rounded-lg p-6">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                {getInitials(user?.name)}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 text-slate-900 relative overflow-hidden">
+      {/* Enhanced background design */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-indigo-100/20 blur-3xl" />
+        <div className="absolute top-1/3 -left-20 h-80 w-80 rounded-full bg-blue-100/20 blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 h-72 w-72 rounded-full bg-emerald-100/10 blur-3xl" />
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(100,116,139,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(100,116,139,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
+      </div>
+
+      {/* Floating logo watermark - more subtle */}
+      <div
+        aria-hidden
+        className="fixed  h-[100vh] w-[150vw]  hidden xl:block opacity-[0.70]"
+        style={{
+          backgroundImage: `url(${LogoPng})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+      <div className="relative min-h-screen  py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-12 gap-6">
+            {/* Sidebar */}
+            <div className="col-span-12 md:col-span-4 bg-white shadow-lg rounded-lg p-6">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                  {getInitials(user?.name)}
+                </div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {user?.name}
+                </h1>
+                <p className="text-gray-600 capitalize">{user?.role}</p>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">{user?.name}</h1>
-              <p className="text-gray-600 capitalize">{user?.role}</p>
+
+              <nav className="space-y-2">
+                {navItems.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => setActiveKey(item.key)}
+                    className={`w-full text-left font-semibold px-4 py-2 rounded-md transition ${
+                      activeKey === item.key
+                        ? "bg-blue-100 text-blue-700 font-medium"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
             </div>
 
-            <nav className="space-y-2">
-              {navItems.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => setActiveKey(item.key)}
-                  className={`w-full text-left font-semibold px-4 py-2 rounded-md transition ${
-                    activeKey === item.key
-                      ? "bg-blue-100 text-blue-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {/* Main Content */}
-          <div className="col-span-12 md:col-span-8 bg-white shadow-lg rounded-lg p-6">
-            <ErrorBoundary>{renderContent()}</ErrorBoundary>
+            {/* Main Content */}
+            <div className="col-span-12 md:col-span-8 bg-white shadow-lg rounded-lg p-6">
+              <ErrorBoundary>{renderContent()}</ErrorBoundary>
+            </div>
           </div>
         </div>
       </div>
