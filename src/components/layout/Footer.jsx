@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Phone, Mail, MapPin } from "lucide-react";
-import LogoFooter from "../../../public/images/LogoFooter.png";
+import LogoFooter from "../../assets/images/LogoFooter.png";
 
 // Optional: place SVG/PNG logos at public/images/payments/* and update below
 const PAYMENT_LOGOS = [

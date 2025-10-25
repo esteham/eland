@@ -21,8 +21,8 @@ import {
 import { useLanguage } from "../../contexts/LanguageContext";
 import { translations } from "../../fonts/HomePageFonts";
 
-import Background from "../../../public/images/background.png";
-import LogoPng from "../../../public/images/Logo.png";
+import Background from "../../assets/images/background.png";
+import LogoPng from "../../assets/images/Logo.png";
 
 export default function HomePage() {
   const { language } = useLanguage();

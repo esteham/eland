@@ -12,7 +12,7 @@ import {
   MapPinned,
 } from "lucide-react";
 
-import LogoHeader from "../../../public/images/LogoHeader.png";
+import LogoHeader from "../../assets/images/LogoHeader.png";
 
 export default function Header() {
   const [open, setOpen] = useState(false);

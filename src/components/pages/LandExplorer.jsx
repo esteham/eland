@@ -4,9 +4,9 @@ import api from "../../api";
 import { useAuth } from "../../auth/AuthContext";
 import { Map, SquareGanttChart, Search, X } from "lucide-react";
 
-import khatiyanImg from "../../../public/images/khatiyan.png";
-import mouzaMapImg from "../../../public/images/mouza-map.png";
-import LogoPng from "../../../public/images/background.png";
+import khatiyanImg from "../../assets/images/khatiyan.png";
+import mouzaMapImg from "../../assets/images/mouza-map.png";
+import LogoPng from "../../assets/images/background.png";
 
 // ---------- UI helpers ----------
 const Spinner = ({ className = "w-4 h-4" }) => (

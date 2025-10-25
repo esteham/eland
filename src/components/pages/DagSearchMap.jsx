@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import L from "leaflet";
 import { searchDagGeometry } from "../../api";
 
-import LogoPng from "../../../public/images/background.png";
+import LogoPng from "../../assets/images/background.png";
 
 function FitTo({ bbox, layerRef }) {
   const map = useMap();
